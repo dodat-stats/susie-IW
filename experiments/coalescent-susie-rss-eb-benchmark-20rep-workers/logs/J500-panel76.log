@@ -1,0 +1,28 @@
+Simulating coalescent reference panel: coalescent N=2000, reference N=2000, J=500, seed=76
+J=500 panel=76 true_eta0=20 true_L=1
+J=500 panel=76 true_eta0=20 true_L=2
+J=500 panel=76 true_eta0=20 true_L=3
+J=500 panel=76 true_eta0=50 true_L=1
+J=500 panel=76 true_eta0=50 true_L=2
+J=500 panel=76 true_eta0=50 true_L=3
+J=500 panel=76 true_eta0=100 true_L=1
+J=500 panel=76 true_eta0=100 true_L=2
+J=500 panel=76 true_eta0=100 true_L=3
+J=500 panel=76 true_eta0=200 true_L=1
+J=500 panel=76 true_eta0=200 true_L=2
+J=500 panel=76 true_eta0=200 true_L=3
+J=500 panel=76 true_eta0=500 true_L=1
+J=500 panel=76 true_eta0=500 true_L=2
+J=500 panel=76 true_eta0=500 true_L=3
+J=500 panel=76 true_eta0=1000 true_L=1
+J=500 panel=76 true_eta0=1000 true_L=2
+J=500 panel=76 true_eta0=1000 true_L=3
+J=500 panel=76 true_eta0=2000 true_L=1
+J=500 panel=76 true_eta0=2000 true_L=2
+J=500 panel=76 true_eta0=2000 true_L=3
+J=500 panel=76 true_eta0=5000 true_L=1
+J=500 panel=76 true_eta0=5000 true_L=2
+J=500 panel=76 true_eta0=5000 true_L=3
+Warning message:
+Possible summary statistics and R reference mismatch detected. Fine-mapping results may be unreliable; inspect fit$R_finite_diagnostics for details. A one-effect diagnostic is available at fit$R_finite_diagnostics$ser_model; it is a one-effect credible-set model as in Maller et al. 2012, and its alpha row is the PIP. 
+Completed results-J500-panel76.csv

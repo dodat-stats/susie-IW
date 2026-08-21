@@ -1,0 +1,6 @@
+J: 1000
+panel seed: 65
+simulation seed: 2651200
+true eta0: 200
+causal variants: 249, 873
+causal LD: -0.000786

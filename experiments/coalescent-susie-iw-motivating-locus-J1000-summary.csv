@@ -1,0 +1,5 @@
+method,selected_lambda,raw_eta0,eta0_used,model_L,reported_L,fallback,partitioned_SER,causal_coverage,all_causal_covered,false_sets
+SuSiE-RSS: in-sample LD,,,,5,2,FALSE,FALSE,1,TRUE,0
+SuSiE-RSS: reference LD,,,,5,4,FALSE,FALSE,1,TRUE,2
+Collapsed-R,0.002,93.6592802382117,157.066612959481,5,2,FALSE,FALSE,1,TRUE,0
+AIW-N,0.002,144.012313546978,205.073534490897,2,2,FALSE,FALSE,1,TRUE,0

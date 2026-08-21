@@ -1,0 +1,5 @@
+Simulating two populations: T=1 generations, panel seed=107
+  N0=100
+  N0=500
+  N0=2000
+Wrote analysis/ancestry-mismatch-coalescent-workers/results-T1-seed107.csv

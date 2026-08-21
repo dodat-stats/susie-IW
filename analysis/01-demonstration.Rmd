@@ -1,0 +1,178 @@
+---
+title: "AR SuSiE-IW demonstration"
+author: "Dat Do"
+date: "`r Sys.Date()`"
+site: workflowr::wflow_site
+params:
+  run_analysis: true
+output:
+  workflowr::wflow_html:
+    toc: true
+    toc_float: true
+    number_sections: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+This page records the self-contained AR-correlation demonstration distributed
+with the project code. It simulates data from the SuSiE-IW model and
+compares in-sample and reference-LD SuSiE-RSS, collapsed-R, and AIW-N, with and
+without concentration calibration.
+
+The complete simulation and fits run when this page is rendered. Set the YAML
+parameter `run_analysis` to `false` to skip the computationally nontrivial
+analysis during a workflowr build.
+
+## Analysis
+
+```{r analysis, eval=params$run_analysis}
+release_dir <- if (file.exists("01-collapsed-R.R")) {
+  "."
+} else {
+  "code"
+}
+source(file.path(release_dir, "01-collapsed-R.R"))
+source(file.path(release_dir, "02-AIW-and-AIW-N.R"))
+source(file.path(release_dir, "03-SER-fallback-and-plot.R"))
+
+# -------------------------------------------------------------------------
+# Simulation settings
+# -------------------------------------------------------------------------
+
+seed <- 5L
+J <- 500L
+N <- 50000L
+L <- 5L
+heritability <- 1e-2
+ar_correlation <- 0.9
+true_lambda <- 1e-3
+true_eta0 <- 200
+causal <- c(100L, 400L)       # weak LD because the variants are far apart
+effect_weights <- c(7, 4)
+lambda_grid <- collapsed_r_default_lambda_grid()
+
+collapsed_eta0_multiplier <- 1.677
+aiwn_eta0_multiplier <- 1.424
+
+# -------------------------------------------------------------------------
+# SuSiE-IW simulation: R | R0, followed by v | R, beta
+# -------------------------------------------------------------------------
+
+set.seed(seed)
+R0 <- outer(seq_len(J), seq_len(J), function(j, k) {
+  ar_correlation^abs(j - k)
+})
+Rbar_true <- (1 - true_lambda) * R0 + true_lambda * diag(J)
+
+precision <- stats::rWishart(
+  1L, df = true_eta0 + J + 1L,
+  Sigma = solve(true_eta0 * Rbar_true)
+)[, , 1L]
+R_in <- stats::cov2cor(solve(precision))
+R_in <- (R_in + t(R_in)) / 2
+diag(R_in) <- 1
+
+beta <- numeric(J)
+beta[causal] <- effect_weights
+beta <- beta * sqrt(
+  heritability / as.numeric(crossprod(beta, R_in %*% beta))
+)
+noise <- as.numeric(t(chol(R_in)) %*% stats::rnorm(J)) / sqrt(N)
+v <- as.numeric(R_in %*% beta) + noise
+
+cat(sprintf(
+  "Simulated J=%d, N=%d, h2=%g; causal LD=%.3f\n",
+  J, N, heritability, R_in[causal[1L], causal[2L]]
+))
+
+# -------------------------------------------------------------------------
+# Six fits. eta0_multiplier=1 gives the uncorrected method.
+# -------------------------------------------------------------------------
+
+susie_in <- fit_susie_rss(v, R_in, N, L = L)
+susie_out <- fit_susie_rss(v, R0, N, L = L)
+
+collapsed_raw <- susie_iw(
+  v = v, R0 = R0, N = N, L = L,
+  lambda_grid = lambda_grid,
+  eta0_multiplier = 1,
+  verbose = FALSE
+)
+
+collapsed_calibrated <- susie_iw(
+  v = v, R0 = R0, N = N, L = L,
+  lambda_grid = lambda_grid,
+  eta0_multiplier = collapsed_eta0_multiplier,
+  verbose = FALSE
+)
+
+aiwn_raw <- susie_aiw(
+  v = v, R0 = R0, N = N, L = L, approximation = "N",
+  lambda_grid = lambda_grid,
+  eta0_multiplier = 1,
+  verbose = FALSE
+)
+aiwn_calibrated <- susie_aiw(
+  v = v, R0 = R0, N = N, L = L, approximation = "N",
+  lambda_grid = lambda_grid,
+  eta0_multiplier = aiwn_eta0_multiplier,
+  verbose = FALSE
+)
+
+fits <- setNames(list(
+  susie_in, susie_out, collapsed_raw, collapsed_calibrated,
+  aiwn_raw, aiwn_calibrated
+), c(
+  "SuSiE-RSS: in-sample R",
+  "SuSiE-RSS: out-of-sample R0",
+  "Collapsed-R: raw eta0",
+  sprintf("Collapsed-R: %.3f x eta0", collapsed_eta0_multiplier),
+  "AIW-N: raw eta0",
+  sprintf("AIW-N: %.3f x eta0", aiwn_eta0_multiplier)
+))
+
+ld_for_fit <- list(
+  R_in, R0,
+  collapsed_raw$selected_Rbar, collapsed_calibrated$selected_Rbar,
+  aiwn_raw$selected_Rbar, aiwn_calibrated$selected_Rbar
+)
+plot_items <- Map(function(fit, R) list(object = fit, R = R),
+                  fits, ld_for_fit)
+names(plot_items) <- names(fits)
+
+plot_iw_comparison(
+  plot_items, causal = causal, ncol = 3L,
+  main = "SuSiE-IW simulation: PIPs and reported credible sets"
+)
+
+# Compact numerical report printed after the figure.
+summary_table <- do.call(rbind, Map(function(label, fit) {
+  row <- summarize_iw_fit(fit, causal = causal)
+  row$method <- label
+  row
+}, names(fits), fits))
+rownames(summary_table) <- NULL
+print(summary_table, row.names = FALSE, digits = 4)
+
+cat("\nSelected mismatch parameters\n")
+print(data.frame(
+  method = c("Collapsed-R raw", "Collapsed-R calibrated",
+             "AIW-N raw", "AIW-N calibrated"),
+  lambda = c(collapsed_raw$selected_lambda,
+             collapsed_calibrated$selected_lambda,
+             aiwn_raw$selected_lambda, aiwn_calibrated$selected_lambda),
+  raw_eta0 = c(collapsed_raw$raw_eta0,
+               collapsed_calibrated$raw_eta0,
+               aiwn_raw$selected_raw_eta0,
+               aiwn_calibrated$selected_raw_eta0),
+  eta0_used = c(collapsed_raw$eta0_used,
+                collapsed_calibrated$eta0_used,
+                aiwn_raw$selected_eta0,
+                aiwn_calibrated$selected_eta0),
+  row.names = NULL
+), row.names = FALSE, digits = 5)
+```

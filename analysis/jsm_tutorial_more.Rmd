@@ -1,0 +1,332 @@
+---
+title: "Exploring ideas for dealing with LD mismatch in SuSiE"
+author: Peter Carbonetto
+output:
+  workflowr::wflow_html:
+    toc: no
+    theme: readable
+    highlight: textmate
+    lib_dir: site_libs
+    self_contained: no
+---
+
+This vignette builds on my
+[JSM tutorial](https://stephenslab.github.io/finemap/jsm_tutorial.html).
+It contains some additional explorations on SuSiE and the effects of
+errors in the LD matrix on errors in the fine-mapping results.
+
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center",dpi = 120)
+```
+
+For this tutorial, I'm using a lightly modified version of susieR
+available in the "output_residuals" branch. I would recommend using this
+version to reproduce the same results I got.
+
+```{r install-susie, eval=FALSE}
+library(remotes)
+install_github("stephenslab/susieR@output_residuals")
+```
+
+Load all the packages needed for this analysis. Note the version of
+susieR that I am using.
+
+```{r load-pkgs}
+library(ggplot2)
+library(cowplot)
+library(susieR)
+packageVersion("susieR")
+```
+
+Set the seed for reproducibility:
+
+```{r set-seed}
+set.seed(1)
+```
+
+The data set contains genotype and quantitative trait data for $n
+= 574$ individuals and $p = 750$ genetic markers (SNPs).
+
+```{r load-data}
+load("jsm_tutorial_data.RData")
+n <- nrow(X)
+dim(X)
+```
+
+This is a function we will use in the code chunks below to visualize
+the results of the SuSiE fine-mapping analysis.
+
+```{r susie-plot-better}
+pip_plot <- function (fit, causal_snps = NULL, xlab = "") {
+  cs_colors <- c("dodgerblue","limegreen","darkorange")
+  pip <- fit$pip
+  n   <- length(pip)
+  dat <- data.frame(pos = 1:n,pip = pip,CS = as.character(NA))
+  num_cs <- length(fit$sets$cs)
+  for (i in num_cs:1) {
+    j <- fit$sets$cs[[i]]
+	dat[j,"CS"] <- paste0("CS",i)
+  }
+  dat_cs <- subset(dat,!is.na(CS))
+  out <- ggplot(dat,aes(x = pos,y = pip)) +
+    geom_point() +
+	geom_point(data = dat_cs,shape = 1,size = 3,
+	           mapping = aes(color = CS)) +
+	scale_x_continuous(breaks = NULL) +
+	scale_color_manual(values = cs_colors) + 
+	labs(x = xlab,y = "PIP") +
+    theme_cowplot(font_size = 12)
+  if (!is.null(causal_snps)) {
+	dat_causal <- dat[causal_snps,]
+    out <- out + geom_point(data = dat_causal,color = "red")
+  }
+  return(out)
+}
+```
+
+When we use the "in-sample" LD to fit the SuSiE model, SuSiE correctly
+predicts that there are two causal SNPs (the third CS is very diffuse
+and will be shrunk to zero we let the prior adapt to the data):
+
+```{r susie-rss, fig.height=1.75, fig.width=5.25}
+fit <- susie_rss(zhat,R,n = n,L = 3,estimate_prior_variance = FALSE,
+                 tol = 1e-8,min_abs_corr = 0)
+causal_snps <- which(b_true != 0)
+pip_plot(fit,causal_snps) +
+  ggtitle("in-sample LD")
+```
+
+On the other hand, when we use the "out-of-sample" LD, SuSiE produces
+a "ghost CS" that does not contain a true causal SNP:
+
+```{r susie-rss-out, fig.height=1.75, fig.width=5.25}
+fit_out <- susie_rss(zhat,R_out,n = n,L = 3,estimate_prior_method = "EM",
+                     tol = 1e-8,min_abs_corr = 0)
+pip_plot(fit_out,causal_snps) +
+  ggtitle("out-of-sample LD")
+```
+
+Examining the residuals gives some insights into the differences
+between the SuSiE results with the in-sample and out-of-sample LD
+matrices.
+
+```{r residuals-plot}
+residuals_plot <- function (fit, z, n, l, cs_color = "red",
+                                    title = "") {
+  cs  <- fit$sets$cs[[l]]
+  dat <- data.frame(z = z,res = fit$XtR[,l]/sqrt(n))
+  dat_cs <- dat[cs,]
+  zmin <- min(c(dat$z,dat$res))
+  zmax <- max(c(dat$z,dat$res))
+  return(ggplot(dat,aes(x = z,y = res)) +
+         geom_point() +
+    	 geom_point(data = dat_cs,shape = 1,size = 3,color = cs_color) +
+		 geom_abline(intercept = 0,slope = 1,color = "magenta",
+		             linetype = "dotted")  +
+	     xlim(zmin,zmax) +
+		 ylim(zmin,zmax) +
+		 labs(x = "z-score",y = "adjusted z-score",title = title) +
+		 theme_cowplot(font_size = 12) +
+		 theme(plot.title = element_text(face = "plain",size = 12)))
+}
+```
+
+In this scatterplot, we compare the z-scores against the "adjusted
+z-scores" that were used to fit the third SER (using the in-sample
+LD). These adjusted z-scores were obtained by removing posterior mean
+effects of the first and second SERs from the z-scores.
+
+```{r residuals-plot-ser-3, fig.height=2.75, fig.width=5}
+z <- sqrt(n/(n + zhat^2)) * zhat
+p1 <- residuals_plot(fit,z,n,l = 3,title = "in-sample LD")
+p2 <- residuals_plot(fit_out,z,n,l = 3,title = "out-of-sample LD")
+plot_grid(p1,p2,nrow = 1,ncol = 2)
+```
+
+Notice that the use of an out-of-sample LD introduces errors when
+adjusting the z-scores, and therefore we end up with "noisier" data.
+
+It is helpful to understand this result in more detail. While it is
+true the out-of-sample LD introduces errors, it introduces errors in a
+specific way: the errors in the out-of-sample LD matter that matter
+most are the correlations with the SNPs in the first two CSs.
+
+```{r residuals-more-1, fig.height=2.5, fig.width=5}
+j1 <- 679
+j2 <- 129
+pdat1 <- data.frame(res_err = fit$XtR[,3] - fit_out$XtR[,3],
+                    cor_err = R_out[,j1] - R[,j1])
+pdat2 <- data.frame(res_err = fit$XtR[,3] - fit_out$XtR[,3],
+                    cor_err = -(R_out[,j2] - R[,j2]))
+p1 <- ggplot(pdat1,aes(x = res_err,y = cor_err)) +
+  geom_point() +
+  labs(x = "error in z-scores",y = "correlation error") +
+  theme_cowplot(font_size = 12)
+p2 <- ggplot(pdat2,aes(x = res_err,y = cor_err)) +
+  geom_point() +
+  labs(x = "error in z-scores",y = "correlation error") +
+  theme_cowplot(font_size = 12)
+plot_grid(p1,p2,nrow = 1,ncol = 2)
+```
+
+Next, I'm testing out Dat's method, which deals with the LD mismatch
+in a model-based way.
+
+```{r compute-summary-stats}
+n <- nrow(X)
+p <- ncol(X)
+X <- scale(X,center = TRUE,scale = TRUE)
+y <- drop(scale(y,center = TRUE,scale = TRUE))
+v <- drop(crossprod(X,y))/n
+R_out <- 0.999*R_out + 0.001*diag(p)
+```
+
+This function returns a CS given the PIPs:
+
+```{r get-cs}
+get_cs <- function (pip, coverage = 0.95) {
+  i <- order(pip,decreasing = TRUE)
+  n <- which(cumsum(pip[i]) > coverage)[1]
+  return(i[1:n])
+}
+```
+
+When the prior on ${\bf R}$ is highly informative, Dat's method
+essentially recovers the same result as the curent `susie_rss()` that
+ignores LD mismatch:
+
+```{r aiw-1, fig.height=1.75, fig.width=5.25, results="hide", message=FALSE}
+source("code/02-AIW-and-AIW-N.R")
+out <- fit_aiwn(v,R_out,n,L = 3,eta0_multiplier = 1000,lambda_grid = 0,
+                 min_abs_corr = 0,max_iter = 100,verbose = TRUE)
+out$sets <- list(cs = list(CS1 = get_cs(out$selected_fit$alpha[1,]),
+                           CS2 = get_cs(out$selected_fit$alpha[2,]),
+                           CS3 = get_cs(out$selected_fit$alpha[3,])))
+pip_plot(out,causal_snps)
+```
+
+On the other hand, when the prior is largely uninformative, Dat's
+method is very conservative, and only recovers one of the two causal SNPs:
+
+```{r aiw-2, fig.height=1.75, fig.width=5.25, results="hide", message=FALSE}
+out <- fit_aiwn(v,R_out,n,L = 3,eta0_multiplier = 1,lambda_grid = 0,
+                min_abs_corr = 0,max_iter = 100,verbose = TRUE)
+out$sets <- list()
+out$sets <- list(cs = list(CS1 = get_cs(out$selected_fit$alpha[1,])))
+pip_plot(out,causal_snps)
+```
+
+Ideally there should be a "middle ground" that finds a good tradeoff
+between identifying both CSs and recognizing the inaccuracies in the
+LD, but I was unsuccessful:
+
+```{r aiw-3, fig.height=1.75, fig.width=5.25, results="hide", message=FALSE}
+out <- fit_aiwn(v,R_out,n,L = 3,eta0_multiplier = 10,lambda_grid = 0,
+                 min_abs_corr = 0,max_iter = 100,verbose = TRUE)
+out$sets <- list(cs = list(CS1 = get_cs(out$selected_fit$alpha[1,]),
+                           CS2 = get_cs(out$selected_fit$alpha[2,]),
+                           CS3 = get_cs(out$selected_fit$alpha[3,])))
+pip_plot(out,causal_snps)
+```
+
+Next, I'm trying out the "collapsed" method developed by Dat. Although
+it has some disappointments, it seems to be achieving closer to the
+behaviour that we are looking for, at least in this one example.
+
+When the prior is very informative (large $\eta_0$), the result is
+very similiar to `susie_rss()` (which does not model LD mismatch):
+
+```{r collapsed-1, fig.height=1.75, fig.width=5.25}
+source("code/01-collapsed-R.R")
+source("code/03-SER-fallback-and-plot.R")
+out1 <- susie_iw(v,R_out,n,L = 3,lambda_grid = 0,eta0 = 1000,
+                max_iter = 100,tol = 1e-6,min_abs_corr = 0,
+				verbose = FALSE)
+pip_plot(out1,causal_snps)
+```
+
+On the other hand, when the prior is largely uninformative (small
+$\eta_0$), the method is conservative, and recovers only one of the
+two causal SNPs:
+
+```{r collapsed-2, fig.height=1.75, fig.width=5.25}
+out2 <- susie_iw(v,R_out,n,L = 3,lambda_grid = 0,eta0 = 75,
+                 max_iter = 100,tol = 1e-6,min_abs_corr = 0,
+		 		 verbose = FALSE)
+pip_plot(out2,causal_snps)
+```
+
+The collapsed method is able to achieve a "middle ground" (here I set
+$\eta_0 = 200$) that identifies both causal SNPs without also
+returning a third (false positive) causal SNP:
+
+```{r collapsed-3, fig.height=1.75, fig.width=5.25}
+out3 <- susie_iw(v,R_out,n,L = 3,lambda_grid = 0,eta0 = 125,
+                 max_iter = 100,tol = 1e-6,min_abs_corr = 0,
+		 		 verbose = FALSE)
+pip_plot(out3,causal_snps)
+```
+
+The main disappointment with this result is that in achieving this
+middle ground, the method has also become more uncertain about which
+SNP is the causal SNP within each CS. (Although that may not
+necessarily be a bad thing—*to discuss*.)
+
+Another thing is that the ELBO from the different fits does not select
+the "right" result:
+
+```{r compare-collapsed-models}
+max(out1$elbo)
+max(out2$elbo)
+max(out3$elbo)
+```
+
+Finally, I'd like to explore a very simple idea that has some of the
+features we are seeking but not others. This idea is not intended to
+be a real method but just a way of illustrate some of the ideas we are
+exploring. Two of the features it has that we are seeking are:
+
+1. It has a parameterized LD matrix ${\bf R}$ that can be adapted to
+   the data. (Either implicitly or explicitly, like it is here.)
+
+2. Adapting R should focus only on the correlations with the candidate
+   causal SNPs; due to the "irrelevance of null SNPs" property, these
+   are the only correlations that matter.
+
+```{r simple-idea, message=FALSE}
+nw <- 20
+dat <- data.frame(weight = seq(0,0.005,length.out = nw),V = 0)
+for (i in 1:nw) {
+  R_mix <- cov2cor(R_out + dat[i,"weight"]*tcrossprod(z))
+  fit_mix <- susie_rss(zhat,R_mix,n = n,L = 3,estimate_prior_method = "EM",
+                       tol = 1e-8,min_abs_corr = 0,verbose = FALSE)
+  dat[i,"V"] <- min(fit_mix$V)
+}
+```
+
+This simple method has a single parameter (a weight) that interpolates
+between the out-of-sample LD matrix and the cross-product of the
+z-scores. So we can vary this weight to produce different fine-mapping
+results. One problem is that we don't have a good way of selecting the
+weight, but it is perhaps interesting that there is a "sweet spot" of
+weights in which `susie_rss()` shrinks the third CS close to zero:
+
+```{r simple-idea-2, fig.height=2.75, fig.width=3}
+par(mar = c(4,4,2,1))
+plot(dat$weight,dat$V,pch = 20,xlab = "weight")
+lines(dat$weight,dat$V)
+```
+
+Indeed, for a carefully chosen weight, the result looks very close to
+what we got from using the in-sample LD:
+
+```{r simple-idea-pip-plot, fig.height=1.75, fig.width=5.25, message=FALSE}
+w <- dat[which.min(dat$V),"weight"]
+R_mix <- cov2cor(R_out + w*tcrossprod(z))
+fit_mix <- susie_rss(zhat,R_mix,n = n,L = 3,estimate_prior_method = "EM",
+                     tol = 1e-8,min_abs_corr = 0,verbose = FALSE)
+pip_plot(fit_mix,causal_snps)
+```
+
+To be clear this is just intended to explore the ideas—it isn't practical.

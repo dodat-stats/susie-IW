@@ -1,0 +1,7 @@
+method,true_L,fits,finite_fits,finite_frequency,convergence_frequency,normal_limit_frequency,optimization_boundary_frequency,selected_L_mean,selected_L_correct
+AIW-N,1,80,76,0.95,1,0.05,0,2.9125,0.475
+AIW-N,2,80,77,0.9625,1,0.0375,0,3.175,0.2125
+AIW-N,3,80,75,0.9375,1,0.0625,0,2.875,0.1875
+collapsed-R,1,80,78,0.975,1,0.025,0,5,0
+collapsed-R,2,80,76,0.95,1,0.05,0,5,0
+collapsed-R,3,80,76,0.95,1,0.05,0,5,0

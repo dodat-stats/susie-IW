@@ -1,0 +1,3 @@
+"architecture","susieR_version","R_finite","R_mismatch","mismatch_estimator","lambda_bias","corrected_reference_size","Q_art","residual_artifact_flag","CS_sensitivity_flag","overall_reliability_flag","convergence_reason","converged","iterations"
+"L2","0.16.6",2000,"eb","mle",0.00340536529616302,256.057993085177,0.00636086364817912,FALSE,FALSE,FALSE,"alpha_pip_fixed_point",TRUE,11
+"L3","0.16.6",2000,"eb","mle",0.00219686128169041,370.801422672061,0.00785800927095795,FALSE,FALSE,FALSE,"alpha_pip_fixed_point",TRUE,18

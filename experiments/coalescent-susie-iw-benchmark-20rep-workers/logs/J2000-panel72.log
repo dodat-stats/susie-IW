@@ -1,0 +1,26 @@
+Simulating coalescent reference panel: coalescent N=2000, reference N=2000, J=2000, seed=72
+J=2000 panel=72 true_eta0=20 true_L=1
+J=2000 panel=72 true_eta0=20 true_L=2
+J=2000 panel=72 true_eta0=20 true_L=3
+J=2000 panel=72 true_eta0=50 true_L=1
+J=2000 panel=72 true_eta0=50 true_L=2
+J=2000 panel=72 true_eta0=50 true_L=3
+J=2000 panel=72 true_eta0=100 true_L=1
+J=2000 panel=72 true_eta0=100 true_L=2
+J=2000 panel=72 true_eta0=100 true_L=3
+J=2000 panel=72 true_eta0=200 true_L=1
+J=2000 panel=72 true_eta0=200 true_L=2
+J=2000 panel=72 true_eta0=200 true_L=3
+J=2000 panel=72 true_eta0=500 true_L=1
+J=2000 panel=72 true_eta0=500 true_L=2
+J=2000 panel=72 true_eta0=500 true_L=3
+J=2000 panel=72 true_eta0=1000 true_L=1
+J=2000 panel=72 true_eta0=1000 true_L=2
+J=2000 panel=72 true_eta0=1000 true_L=3
+J=2000 panel=72 true_eta0=2000 true_L=1
+J=2000 panel=72 true_eta0=2000 true_L=2
+J=2000 panel=72 true_eta0=2000 true_L=3
+J=2000 panel=72 true_eta0=5000 true_L=1
+J=2000 panel=72 true_eta0=5000 true_L=2
+J=2000 panel=72 true_eta0=5000 true_L=3
+Completed results-J2000-panel72.csv

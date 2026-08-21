@@ -8,4 +8,46 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+This project develops mismatch-aware fine-mapping for GWAS summary statistics
+analyzed with external reference LD. Its goals are to measure mismatch, recover
+reference-LD SuSiE-RSS when the inputs are matched, and avoid spurious
+additional signals when they are mismatched.
+
+When the mismatch-aware fit returns zero or one deduplicated,
+purity-passing credible set, the operational procedure reports a 95% credible
+set from a single-effect RSS refit using only the unit diagonal. This fallback
+is a locus-level summary for loci already established as associated; it does
+not test association or assert that exactly one causal variant is present.
+
+## Reproducible paper experiments
+
+The primary simulation uses reproducible coalescent reference LD generated
+with `stdpopsim` and `msprime`; in-sample
+LD and summary statistics are then generated from the SuSiE-IW model. The study
+crosses one, two and three true effects with a range of true mismatch
+concentrations and compares in-sample SuSiE-RSS, reference-LD SuSiE-RSS,
+collapsed-R and AIW-N.
+
+Run the full concentration calibration, independent performance benchmark,
+summaries and paper figures with:
+
+```bash
+Rscript --vanilla experiments/run-paper-coalescent-experiments.R
+```
+
+Worker-level results are checkpointed, so the command resumes completed jobs
+after interruption. The principal numerical summary is in
+`experiments/coalescent-susie-iw-benchmark-report.md`; the complete design and
+frozen calibration constants are documented in the supplementary manuscript.
+
+Earlier development experiments are retained in a local-only archive and are
+not invoked by the current manuscript workflows.
+
+## Collaborator demonstrations
+
+- [AR SuSiE-IW demonstration](01-demonstration.html)
+- [Coalescent SuSiE-IW simulation](02-coalescent-IW-simulation.html)
+- [Comparison with a null posterior-mean LD estimate](03-compare-null-estimate-R.html)
+- [Single-dataset null-estimate-R demonstration](04-null-estimate-R-demonstration.html)
+- [Comparison with the susieR EB mismatch correction](05-compare-susie-rss.html)
+- [Correlation-standardized collapsed-R heuristic](06-heuristic-collapsed-R.html)

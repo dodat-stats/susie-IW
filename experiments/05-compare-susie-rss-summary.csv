@@ -1,0 +1,11 @@
+"architecture","method","selected_lambda","raw_eta0","eta0_used","model_L","reported_L","fallback","partitioned_SER","causal_coverage","all_causal_covered","false_sets"
+"L2","SuSiE-RSS: in-sample R",NA,NA,NA,5,2,FALSE,FALSE,1,TRUE,0
+"L2","SuSiE-RSS: reference R0",NA,NA,NA,5,3,FALSE,FALSE,1,TRUE,1
+"L2","SuSiE-RSS: finite R0 + EB mismatch",NA,NA,NA,5,2,FALSE,FALSE,1,TRUE,0
+"L2","Collapsed-R",0.002,120.034787057542,201.298337895499,5,2,FALSE,FALSE,1,TRUE,0
+"L2","AIW-N",0.002,236.568637458445,336.873739740826,5,3,FALSE,FALSE,1,TRUE,1
+"L3","SuSiE-RSS: in-sample R",NA,NA,NA,5,3,FALSE,FALSE,1,TRUE,0
+"L3","SuSiE-RSS: reference R0",NA,NA,NA,5,4,FALSE,FALSE,1,TRUE,1
+"L3","SuSiE-RSS: finite R0 + EB mismatch",NA,NA,NA,5,3,FALSE,FALSE,1,TRUE,0
+"L3","Collapsed-R",0.002,85.327322523622,143.093919872114,5,1,TRUE,FALSE,0.333333333333333,FALSE,0
+"L3","AIW-N",0.002,161.382080536874,229.808082684508,3,3,FALSE,FALSE,1,TRUE,0
