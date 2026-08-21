@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Dat Do" />
+
+<meta name="date" content="2026-08-20" />
+
+<title>Comparison with a null posterior-mean LD estimate</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie-IW</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie-IW">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Comparison with a null posterior-mean LD
+estimate</h1>
+<h4 class="author">Dat Do</h4>
+<h4 class="date">2026-08-20</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-20
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie-IW/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260820code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260820)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260820code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260820)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    analysis/.DS_Store
+    Ignored:    experiments/.DS_Store
+    Ignored:    plos-paper/
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/03-compare-null-estimate-R.Rmd</code>) and HTML
+(<code>docs/03-compare-null-estimate-R.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie-IW/blob/e430a953742f2347c05c937d2992765aaf663919/analysis/03-compare-null-estimate-R.Rmd" target="_blank">e430a95</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-08-20
+</td>
+<td>
+Add SuSiE-IW analyses and experiment results
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>This page records the comparison proposed by Peter Carbonetto. The
+null model first estimates the inverse-Wishart concentration without
+sparse effects, constructs its posterior-mean LD matrix, and then fits
+SuSiE-RSS. The simulation compares its concentration estimates,
+coverage, and power with collapsed-R and AIW-N.</p>
+<p>The default experiment contains multiple coalescent simulations and
+runs during ordinary workflowr builds. Set
+<code>run_analysis: false</code> in the YAML header to skip it.</p>
+<div id="analysis" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Analysis</h2>
+<pre class="r"><code># Compare Peter Carbonetto&#39;s null-posterior LD estimate with collapsed-R and
+# AIW-N in the coalescent SuSiE-IW simulation. Run this file from either the
+# repository root or code/. It writes two figures, a CSV and
+# an RDS file beside this script, and also draws the figures in RStudio.
+
+release_dir &lt;- if (file.exists(&quot;01-collapsed-R.R&quot;)) {
+  &quot;.&quot;
+} else {
+  &quot;code&quot;
+}
+source(file.path(release_dir, &quot;01-collapsed-R.R&quot;))
+source(file.path(release_dir, &quot;02-AIW-and-AIW-N.R&quot;))
+source(file.path(release_dir, &quot;03-SER-fallback-and-plot.R&quot;))
+
+# -------------------------------------------------------------------------
+# Settings
+# -------------------------------------------------------------------------
+
+seed &lt;- 7L
+J &lt;- as.integer(Sys.getenv(&quot;NULL_R_J&quot;, &quot;500&quot;))
+number_of_replications &lt;- as.integer(Sys.getenv(&quot;NULL_R_REPS&quot;, &quot;20&quot;))
+N0 &lt;- 2000L
+coalescent_sample_size &lt;- 2000L
+N &lt;- 200000L
+h2 &lt;- 1e-3
+true_lambda &lt;- 1e-3
+true_eta0_grid &lt;- c(25, 50, 100, 200, 400, 800)
+true_L &lt;- 2L
+effect_weights &lt;- c(7, 5)
+maximum_fitted_L &lt;- 5L
+lambda_grid &lt;- c(1e-5, 1e-4, 1e-3, 2e-3, 4e-3, 6e-3, 8e-3, 1e-2)
+
+# Frozen calibration used by the current operational procedures. Their raw
+# eta0 estimates are retained separately and are what the eta0 figure shows.
+collapsed_eta0_multiplier &lt;- 1.677
+aiwn_eta0_multiplier &lt;- 1.424
+
+eta0_bounds &lt;- c(1e-4, 1e8)
+eta0_grid_size &lt;- 121L
+bootstrap_replicates &lt;- 1000L
+output_stem &lt;- file.path(&quot;experiments&quot;, &quot;03-null-estimate-R&quot;)
+
+stopifnot(
+  J &gt;= 20L, number_of_replications &gt;= 1L, true_L == 2L,
+  length(effect_weights) == true_L
+)
+
+# -------------------------------------------------------------------------
+# 1. One empirical reference-LD matrix from a human coalescent model
+# -------------------------------------------------------------------------
+
+simulate_coalescent_R0 &lt;- function(
+    J, N0, second_population_size = N0, seed = 1L,
+    chromosome = &quot;chr22&quot;, start = 20e6, end = 21e6,
+    split_time = 10L) {
+  if (!requireNamespace(&quot;reticulate&quot;, quietly = TRUE)) {
+    stop(&quot;Install the R package reticulate&quot;)
+  }
+  if (!nzchar(Sys.getenv(&quot;RETICULATE_PYTHON&quot;))) {
+    python &lt;- Sys.which(&quot;python3&quot;)
+    if (nzchar(python)) {
+      Sys.setenv(RETICULATE_PYTHON = python)
+      reticulate::use_python(python, required = FALSE)
+    }
+  }
+  stdpopsim &lt;- reticulate::import(&quot;stdpopsim&quot;)
+  msprime &lt;- reticulate::import(&quot;msprime&quot;)
+
+  species &lt;- stdpopsim$get_species(&quot;HomSap&quot;)
+  contig &lt;- species$get_contig(
+    chromosome, left = as.integer(start), right = as.integer(end)
+  )
+  demography &lt;- msprime$Demography()
+  demography$add_population(name = &quot;ANC&quot;, initial_size = 20000L)
+  demography$add_population(name = &quot;POP1&quot;, initial_size = 100000L)
+  demography$add_population(name = &quot;POP2&quot;, initial_size = 100000L)
+  demography$add_population_split(
+    time = as.integer(split_time),
+    derived = list(&quot;POP1&quot;, &quot;POP2&quot;), ancestral = &quot;ANC&quot;
+  )
+  models &lt;- list(
+    msprime$DiscreteTimeWrightFisher(duration = 100L),
+    msprime$StandardCoalescent()
+  )
+  tree_sequence &lt;- msprime$sim_ancestry(
+    samples = reticulate::dict(
+      POP1 = as.integer(second_population_size),
+      POP2 = as.integer(N0)
+    ),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    model = models,
+    random_seed = as.integer(seed)
+  )
+  tree_sequence &lt;- msprime$sim_mutations(
+    tree_sequence, rate = 1.29e-8, random_seed = 1L
+  )
+
+  population_ids &lt;- list()
+  for (population in reticulate::iterate(tree_sequence$populations())) {
+    population_ids[[population$metadata$name]] &lt;- population$id
+  }
+  genotype_haploid &lt;- tree_sequence$genotype_matrix()
+  to_diploid &lt;- function(sample_ids) {
+    columns &lt;- as.integer(sample_ids) + 1L
+    haplotypes &lt;- genotype_haploid[, columns, drop = FALSE]
+    genotypes &lt;- haplotypes[, seq(1L, ncol(haplotypes), by = 2L)] +
+      haplotypes[, seq(2L, ncol(haplotypes), by = 2L)]
+    t(genotypes)
+  }
+  genotype_1 &lt;- to_diploid(tree_sequence$samples(
+    population = as.integer(population_ids$POP1)
+  ))
+  genotype_0 &lt;- to_diploid(tree_sequence$samples(
+    population = as.integer(population_ids$POP2)
+  ))
+  frequency_1 &lt;- colMeans(genotype_1) / 2
+  frequency_0 &lt;- colMeans(genotype_0) / 2
+  common &lt;- frequency_1 &gt; 0.05 &amp; frequency_1 &lt; 0.95 &amp;
+    frequency_0 &gt; 0.05 &amp; frequency_0 &lt; 0.95
+  genotype_0 &lt;- genotype_0[, common, drop = FALSE]
+  if (ncol(genotype_0) &lt; J) {
+    stop(&quot;The coalescent region contains fewer than J common variants&quot;)
+  }
+  set.seed(seed)
+  first_column &lt;- if (ncol(genotype_0) == J) {
+    1L
+  } else {
+    sample.int(ncol(genotype_0) - J + 1L, 1L)
+  }
+  columns &lt;- first_column + seq_len(J) - 1L
+  R0 &lt;- stats::cor(genotype_0[, columns, drop = FALSE])
+  R0 &lt;- (R0 + t(R0)) / 2
+  diag(R0) &lt;- 1
+  R0
+}
+
+# -------------------------------------------------------------------------
+# 2. Null-model eta0 profile and posterior-mean R
+#
+# R ~ IW_J(eta0 Rbar, eta0 + J + 1),  v | R ~ N_J(0, R/N).
+# Therefore
+# v ~ t_{eta0+2}(0, eta0 Rbar / {N(eta0+2)}),
+# and E(R | v) = (eta0 Rbar + N v v&#39;) / (eta0 + 1).
+# -------------------------------------------------------------------------
+
+null_log_marginal_eta0 &lt;- function(eta0, v, Rbar_chol, N) {
+  if (length(eta0) != 1L || !is.finite(eta0) || eta0 &lt;= 0) {
+    return(-Inf)
+  }
+  J &lt;- length(v)
+  transformed_v &lt;- backsolve(Rbar_chol, v, transpose = TRUE)
+  quadratic &lt;- N * sum(transformed_v^2)
+  log_determinant &lt;- 2 * sum(log(diag(Rbar_chol)))
+
+  # For even J this finite sum is more stable than subtracting two lgamma
+  # values when eta0 is large. The fallback handles arbitrary J.
+  half_J &lt;- J / 2
+  if (half_J == floor(half_J)) {
+    log_gamma_ratio &lt;- sum(log((eta0 + 2) / 2 + seq.int(0, half_J - 1)))
+  } else {
+    log_gamma_ratio &lt;- lgamma((eta0 + J + 2) / 2) -
+      lgamma((eta0 + 2) / 2)
+  }
+  log_gamma_ratio + J / 2 * log(N / (pi * eta0)) -
+    log_determinant / 2 -
+    (eta0 + J + 2) / 2 * log1p(quadratic / eta0)
+}
+
+estimate_null_eta0 &lt;- function(
+    v, Rbar, N, bounds = c(1e-4, 1e8), grid_size = 121L) {
+  Rbar_chol &lt;- chol((Rbar + t(Rbar)) / 2)
+  log_grid &lt;- seq(log(bounds[1L]), log(bounds[2L]), length.out = grid_size)
+  objective &lt;- function(log_eta0) {
+    null_log_marginal_eta0(exp(log_eta0), v, Rbar_chol, N)
+  }
+  grid_objective &lt;- vapply(log_grid, objective, numeric(1L))
+  best &lt;- which.max(grid_objective)
+  lower &lt;- log_grid[max(1L, best - 1L)]
+  upper &lt;- log_grid[min(length(log_grid), best + 1L)]
+  refined &lt;- if (lower &lt; upper) {
+    optimize(objective, interval = c(lower, upper), maximum = TRUE)
+  } else {
+    list(maximum = log_grid[best], objective = grid_objective[best])
+  }
+  candidates &lt;- data.frame(
+    log_eta0 = c(log_grid[1L], refined$maximum, tail(log_grid, 1L)),
+    objective = c(grid_objective[1L], refined$objective,
+                  tail(grid_objective, 1L))
+  )
+  selected &lt;- which.max(candidates$objective)
+  list(
+    eta0 = exp(candidates$log_eta0[selected]),
+    log_marginal = candidates$objective[selected],
+    boundary = selected != 2L,
+    Rbar_chol = Rbar_chol
+  )
+}
+
+fit_null_estimate_R &lt;- function(
+    v, R0, N, L = 5L, lambda_grid = NULL,
+    eta0_bounds = NULL, eta0_grid_size = NULL,
+    prior_variance = 0.2, max_iter = 500L, tol = 1e-3,
+    verbose = FALSE) {
+  if (is.null(lambda_grid)) {
+    lambda_grid &lt;- c(1e-5, 1e-4, 1e-3, 2e-3, 4e-3, 6e-3, 8e-3, 1e-2)
+  }
+  if (is.null(eta0_bounds)) eta0_bounds &lt;- c(1e-4, 1e8)
+  if (is.null(eta0_grid_size)) eta0_grid_size &lt;- 121L
+  J &lt;- length(v)
+  candidate_fits &lt;- vector(&quot;list&quot;, length(lambda_grid))
+  profile &lt;- vector(&quot;list&quot;, length(lambda_grid))
+  for (i in seq_along(lambda_grid)) {
+    lambda &lt;- lambda_grid[i]
+    Rbar &lt;- (1 - lambda) * R0 + lambda * diag(J)
+    eta_fit &lt;- estimate_null_eta0(
+      v, Rbar, N, bounds = eta0_bounds, grid_size = eta0_grid_size
+    )
+    R_hat &lt;- (eta_fit$eta0 * Rbar + N * tcrossprod(v)) /
+      (eta_fit$eta0 + 1)
+    R_hat &lt;- (R_hat + t(R_hat)) / 2
+
+    # This is Peter&#39;s posterior mean exactly as proposed. In particular, it
+    # is not converted with cov2cor before the SuSiE-RSS refit.
+    fit &lt;- fit_susie_rss(
+      v = v, R = R_hat, N = N, L = L,
+      prior_variance = prior_variance, max_iter = max_iter, tol = tol
+    )
+    susie_elbo &lt;- tail(fit$elbo, 1L)
+    candidate_fits[[i]] &lt;- fit
+    profile[[i]] &lt;- data.frame(
+      lambda = lambda,
+      eta0 = eta_fit$eta0,
+      null_log_marginal = eta_fit$log_marginal,
+      eta0_boundary = eta_fit$boundary,
+      susie_elbo = susie_elbo,
+      converged = isTRUE(fit$converged)
+    )
+    if (verbose) {
+      message(sprintf(
+        &quot;null-R: lambda=%g eta0=%.5g SuSiE ELBO=%.6f&quot;,
+        lambda, eta_fit$eta0, susie_elbo
+      ))
+    }
+  }
+  profile &lt;- do.call(rbind, profile)
+  best &lt;- which.max(profile$susie_elbo)
+  result &lt;- candidate_fits[[best]]
+  result$method &lt;- &quot;Null posterior-mean R&quot;
+  result$selected_lambda &lt;- profile$lambda[best]
+  result$raw_eta0 &lt;- profile$eta0[best]
+  result$eta0 &lt;- profile$eta0[best]
+  result$eta0_used &lt;- profile$eta0[best]
+  result$R_hat &lt;- (
+    result$eta0 * ((1 - result$selected_lambda) * R0 +
+                     result$selected_lambda * diag(J)) + N * tcrossprod(v)
+  ) / (result$eta0 + 1)
+  result$profile &lt;- profile
+  class(result) &lt;- unique(c(&quot;null_estimate_R&quot;, class(result)))
+  result
+}
+
+# -------------------------------------------------------------------------
+# 3. SuSiE-IW simulation with two weak-LD causal effects in a 7:5 ratio
+# -------------------------------------------------------------------------
+
+choose_weak_ld_variants &lt;- function(R) {
+  candidates &lt;- unique(as.integer(round(seq(
+    max(2, 0.08 * nrow(R)), min(nrow(R) - 1, 0.92 * nrow(R)),
+    length.out = min(250L, nrow(R) - 2L)
+  ))))
+  minimum_separation &lt;- max(8L, floor(nrow(R) / 12))
+  first &lt;- candidates[which.min(abs(candidates - round(nrow(R) / 4)))]
+  available &lt;- candidates[abs(candidates - first) &gt;= minimum_separation]
+  second &lt;- available[which.min(abs(R[first, available]))]
+  c(first, second)
+}
+
+simulate_dataset &lt;- function(true_eta0, replication) {
+  simulation_seed &lt;- seed * 10000000L + as.integer(true_eta0) * 100L +
+    replication
+  set.seed(simulation_seed)
+  precision &lt;- stats::rWishart(
+    1L, df = true_eta0 + J + 1L,
+    Sigma = Rbar_true_inverse / true_eta0
+  )[, , 1L]
+  R &lt;- stats::cov2cor(chol2inv(chol(precision)))
+  R &lt;- (R + t(R)) / 2
+  diag(R) &lt;- 1
+
+  causal &lt;- choose_weak_ld_variants(R)
+  beta_scale &lt;- sqrt(
+    h2 / drop(crossprod(
+      effect_weights, R[causal, causal, drop = FALSE] %*% effect_weights
+    ))
+  )
+  beta &lt;- numeric(J)
+  beta[causal] &lt;- beta_scale * effect_weights
+  noise &lt;- as.numeric(t(chol(R)) %*% stats::rnorm(J)) / sqrt(N)
+  v &lt;- as.numeric(R %*% beta + noise)
+  list(
+    v = v, R = R, beta = beta, causal = causal,
+    causal_LD = R[causal[1L], causal[2L]],
+    expected_z = sqrt(N) * as.numeric(R[causal, , drop = FALSE] %*% beta)
+  )
+}
+
+evaluate_fit &lt;- function(fit, causal) {
+  sets &lt;- susie_get_reported_cs(fit)
+  covered &lt;- vapply(causal, function(j) {
+    any(vapply(sets, function(set) j %in% set, logical(1L)))
+  }, logical(1L))
+  true_sets &lt;- sum(vapply(sets, function(set) any(set %in% causal), logical(1L)))
+  data.frame(
+    estimated_eta0 = if (!is.null(fit$raw_eta0)) {
+      fit$raw_eta0
+    } else {
+      fit$selected_raw_eta0
+    },
+    eta0_used = if (!is.null(fit$eta0_used)) fit$eta0_used else fit$eta0,
+    selected_lambda = fit$selected_lambda,
+    reported_L = length(sets),
+    true_sets = true_sets,
+    false_sets = length(sets) - true_sets,
+    causal_power = mean(covered),
+    all_causal_covered = all(covered),
+    fallback = isTRUE(fit$postprocess$fallback_used),
+    converged = isTRUE(fit$converged)
+  )
+}
+
+if (!identical(Sys.getenv(&quot;NULL_R_FUNCTIONS_ONLY&quot;), &quot;1&quot;)) {
+method_levels &lt;- c(&quot;Null posterior-mean R&quot;, &quot;collapsed-R&quot;, &quot;AIW-N&quot;)
+reuse_results &lt;- identical(Sys.getenv(&quot;NULL_R_REUSE_RESULTS&quot;), &quot;1&quot;)
+if (reuse_results) {
+  saved_results &lt;- readRDS(paste0(output_stem, &quot;.rds&quot;))
+  if (!identical(as.numeric(saved_results$settings$true_eta0_grid),
+                 as.numeric(true_eta0_grid)) ||
+      saved_results$settings$J != J ||
+      saved_results$settings$replications != number_of_replications) {
+    stop(&quot;Saved results do not match the current eta0 grid, J and replications&quot;)
+  }
+  message(&quot;Reusing completed results and regenerating summaries and figures&quot;)
+  R0 &lt;- saved_results$R0
+  results &lt;- saved_results$results
+} else {
+message(&quot;Generating the coalescent reference LD matrix&quot;)
+R0 &lt;- simulate_coalescent_R0(
+  J = J, N0 = N0, second_population_size = coalescent_sample_size,
+  seed = seed
+)
+Rbar_true &lt;- (1 - true_lambda) * R0 + true_lambda * diag(J)
+Rbar_true_inverse &lt;- chol2inv(chol(Rbar_true))
+
+result_rows &lt;- vector(
+  &quot;list&quot;, length(true_eta0_grid) * number_of_replications * 3L
+)
+row_index &lt;- 0L
+for (true_eta0 in true_eta0_grid) {
+  for (replication in seq_len(number_of_replications)) {
+    message(sprintf(
+      &quot;true eta0=%s, replication %d/%d&quot;,
+      format(true_eta0, scientific = FALSE), replication,
+      number_of_replications
+    ))
+    simulation &lt;- simulate_dataset(true_eta0, replication)
+    fits &lt;- list(
+      &quot;Null posterior-mean R&quot; = fit_null_estimate_R(
+        v = simulation$v, R0 = R0, N = N, L = maximum_fitted_L,
+        lambda_grid = lambda_grid, verbose = FALSE
+      ),
+      &quot;collapsed-R&quot; = susie_iw(
+        v = simulation$v, R0 = R0, N = N, L = maximum_fitted_L,
+        lambda_grid = lambda_grid,
+        eta0_multiplier = collapsed_eta0_multiplier,
+        scaled_prior_variance = 0.2, estimate_prior_variance = TRUE,
+        coverage = 0.95, min_abs_corr = 0.5,
+        ser_fallback = TRUE, partition_ser = FALSE,
+        max_iter = 200L, tol = 1e-4, verbose = FALSE
+      ),
+      &quot;AIW-N&quot; = suppressMessages(susie_aiw(
+        v = simulation$v, R0 = R0, N = N, L = maximum_fitted_L,
+        approximation = &quot;N&quot;, lambda_grid = lambda_grid,
+        eta0_multiplier = aiwn_eta0_multiplier,
+        scaled_prior_variance = 0.2, estimate_prior_variance = TRUE,
+        coverage = 0.95, min_abs_corr = 0.5,
+        ser_fallback = TRUE, partition_ser = FALSE,
+        max_iter = 500L, tol = 1e-3, verbose = FALSE
+      ))
+    )
+    for (method in names(fits)) {
+      row_index &lt;- row_index + 1L
+      row &lt;- evaluate_fit(fits[[method]], simulation$causal)
+      row$true_eta0 &lt;- true_eta0
+      row$replication &lt;- replication
+      row$method &lt;- method
+      row$causal_LD &lt;- simulation$causal_LD
+      row$expected_z_stronger &lt;- max(abs(simulation$expected_z))
+      row$expected_z_weaker &lt;- min(abs(simulation$expected_z))
+      result_rows[[row_index]] &lt;- row
+    }
+  }
+}
+results &lt;- do.call(rbind, result_rows)
+}
+results$method &lt;- factor(results$method, levels = method_levels)
+
+# -------------------------------------------------------------------------
+# 4. Summaries and figures
+# -------------------------------------------------------------------------
+
+summarize_cell &lt;- function(data, bootstrap_replicates = 1000L) {
+  metrics &lt;- function(x) c(
+    coverage = if (sum(x$reported_L) &gt; 0) {
+      sum(x$true_sets) / sum(x$reported_L)
+    } else {
+      NA_real_
+    },
+    power = mean(x$causal_power)
+  )
+  estimate &lt;- metrics(data)
+  bootstrap &lt;- replicate(bootstrap_replicates, {
+    metrics(data[sample.int(nrow(data), nrow(data), replace = TRUE), ])
+  })
+  interval &lt;- function(values, probability) {
+    values &lt;- values[is.finite(values)]
+    if (length(values)) {
+      unname(quantile(values, probability, names = FALSE))
+    } else {
+      NA_real_
+    }
+  }
+  data.frame(
+    coverage = estimate[&quot;coverage&quot;],
+    coverage_lower = interval(bootstrap[&quot;coverage&quot;, ], 0.025),
+    coverage_upper = interval(bootstrap[&quot;coverage&quot;, ], 0.975),
+    power = estimate[&quot;power&quot;],
+    power_lower = interval(bootstrap[&quot;power&quot;, ], 0.025),
+    power_upper = interval(bootstrap[&quot;power&quot;, ], 0.975)
+  )
+}
+
+summary_rows &lt;- list()
+summary_index &lt;- 0L
+for (eta0 in true_eta0_grid) {
+  for (method in method_levels) {
+    summary_index &lt;- summary_index + 1L
+    cell &lt;- results[
+      results$true_eta0 == eta0 &amp; as.character(results$method) == method,
+    ]
+    set.seed(900000L + as.integer(eta0) + match(method, method_levels))
+    row &lt;- summarize_cell(cell, bootstrap_replicates)
+    row$true_eta0 &lt;- eta0
+    row$method &lt;- method
+    row$median_estimated_eta0 &lt;- median(cell$estimated_eta0)
+    row$eta0_q25 &lt;- unname(quantile(cell$estimated_eta0, 0.25))
+    row$eta0_q75 &lt;- unname(quantile(cell$estimated_eta0, 0.75))
+    row$mean_reported_L &lt;- mean(cell$reported_L)
+    row$mean_false_sets &lt;- mean(cell$false_sets)
+    row$fallback_frequency &lt;- mean(cell$fallback)
+    summary_rows[[summary_index]] &lt;- row
+  }
+}
+summary_table &lt;- do.call(rbind, summary_rows)
+summary_table$method &lt;- factor(summary_table$method, levels = method_levels)
+
+method_colors &lt;- c(&quot;#D73027&quot;, &quot;#2CA02C&quot;, &quot;#6A3D9A&quot;)
+method_shapes &lt;- c(17, 16, 18)
+names(method_colors) &lt;- names(method_shapes) &lt;- method_levels
+
+draw_eta0 &lt;- function() {
+  normal_limit &lt;- is.infinite(results$estimated_eta0) |
+    results$estimated_eta0 &gt;= 0.99 * eta0_bounds[2L]
+  finite_eta0 &lt;- results$estimated_eta0[
+    is.finite(results$estimated_eta0) &amp; !normal_limit
+  ]
+  display_ceiling &lt;- max(
+    2 * max(true_eta0_grid), 1.25 * max(finite_eta0)
+  )
+  display_eta0 &lt;- results$estimated_eta0
+  display_eta0[normal_limit] &lt;- display_ceiling
+  limits &lt;- range(c(true_eta0_grid, finite_eta0, display_eta0))
+  plot(
+    true_eta0_grid, true_eta0_grid, type = &quot;n&quot;, log = &quot;xy&quot;,
+    xlim = range(true_eta0_grid), ylim = limits,
+    xlab = expression(&quot;true &quot; * eta[0]),
+    ylab = expression(&quot;raw estimated &quot; * hat(eta)[0]),
+    main = expression(&quot;Recovery of &quot; * eta[0]), xaxt = &quot;n&quot;
+  )
+  axis(1, at = true_eta0_grid,
+       labels = format(true_eta0_grid, big.mark = &quot;,&quot;, scientific = FALSE))
+  grid(col = &quot;grey88&quot;, lty = 3)
+  abline(0, 1, lty = 2, col = &quot;grey35&quot;)
+  for (method in method_levels) {
+    individual &lt;- results[as.character(results$method) == method, ]
+    individual_eta0 &lt;- pmin(individual$estimated_eta0, display_ceiling)
+    points(
+      individual$true_eta0, individual_eta0,
+      pch = method_shapes[method], col = grDevices::adjustcolor(
+        method_colors[method], alpha.f = 0.22
+      ), cex = 0.72
+    )
+    medians &lt;- summary_table[as.character(summary_table$method) == method, ]
+    median_eta0 &lt;- pmin(medians$median_estimated_eta0, display_ceiling)
+    eta0_q25 &lt;- pmin(medians$eta0_q25, display_ceiling)
+    eta0_q75 &lt;- pmin(medians$eta0_q75, display_ceiling)
+    lines(
+      medians$true_eta0, median_eta0,
+      type = &quot;b&quot;, pch = method_shapes[method], lwd = 2.2,
+      col = method_colors[method]
+    )
+    show_interval &lt;- is.finite(eta0_q25) &amp; is.finite(eta0_q75) &amp;
+      eta0_q25 &lt; eta0_q75
+    if (any(show_interval)) {
+      arrows(
+        medians$true_eta0[show_interval], eta0_q25[show_interval],
+        medians$true_eta0[show_interval], eta0_q75[show_interval],
+        angle = 90, code = 3, length = 0.03, col = method_colors[method]
+      )
+    }
+  }
+  legend(
+    &quot;topleft&quot;, legend = method_levels, col = method_colors,
+    pch = method_shapes, lwd = 2, bty = &quot;n&quot;, cex = 0.83
+  )
+  if (any(normal_limit)) {
+    mtext(&quot;Normal-limit estimates are shown at the upper plotting boundary&quot;,
+          side = 3, line = 0.15, cex = 0.7, adj = 1)
+  }
+}
+
+draw_performance &lt;- function() {
+  old_par &lt;- par(no.readonly = TRUE)
+  on.exit(par(old_par), add = TRUE)
+  par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3.2, 1), las = 1)
+  for (metric in c(&quot;coverage&quot;, &quot;power&quot;)) {
+    plot(
+      true_eta0_grid, rep(NA_real_, length(true_eta0_grid)),
+      type = &quot;n&quot;, log = &quot;x&quot;, ylim = c(0, 1.03), xaxt = &quot;n&quot;,
+      xlab = expression(&quot;true &quot; * eta[0]),
+      ylab = if (metric == &quot;coverage&quot;) {
+        &quot;credible-set coverage&quot;
+      } else {
+        &quot;causal-variant power&quot;
+      },
+      main = if (metric == &quot;coverage&quot;) &quot;Coverage&quot; else &quot;Power&quot;
+    )
+    axis(1, at = true_eta0_grid,
+         labels = format(true_eta0_grid, big.mark = &quot;,&quot;, scientific = FALSE))
+    grid(col = &quot;grey88&quot;, lty = 3)
+    for (method in method_levels) {
+      data &lt;- summary_table[as.character(summary_table$method) == method, ]
+      lines(
+        data$true_eta0, data[[metric]], type = &quot;b&quot;,
+        pch = method_shapes[method], lwd = 2.2, col = method_colors[method]
+      )
+      lower &lt;- data[[paste0(metric, &quot;_lower&quot;)]]
+      upper &lt;- data[[paste0(metric, &quot;_upper&quot;)]]
+      show_interval &lt;- is.finite(lower) &amp; is.finite(upper) &amp; lower &lt; upper
+      if (any(show_interval)) {
+        arrows(
+          data$true_eta0[show_interval], lower[show_interval],
+          data$true_eta0[show_interval], upper[show_interval],
+          angle = 90, code = 3, length = 0.03, col = method_colors[method]
+        )
+      }
+    }
+    if (metric == &quot;coverage&quot;) {
+      null_summary &lt;- summary_table[
+        as.character(summary_table$method) == &quot;Null posterior-mean R&quot;, 
+      ]
+      no_sets &lt;- !is.finite(null_summary$coverage)
+      if (any(no_sets)) {
+        points(
+          null_summary$true_eta0[no_sets], rep(0.025, sum(no_sets)),
+          pch = 4, lwd = 1.7, col = method_colors[&quot;Null posterior-mean R&quot;]
+        )
+        text(
+          null_summary$true_eta0[no_sets], rep(0.065, sum(no_sets)),
+          labels = &quot;no CS&quot;, cex = 0.68,
+          col = method_colors[&quot;Null posterior-mean R&quot;]
+        )
+      }
+    }
+    if (metric == &quot;power&quot;) {
+      legend(
+        &quot;bottomright&quot;, legend = method_levels, col = method_colors,
+        pch = method_shapes, lwd = 2, bty = &quot;n&quot;, cex = 0.78
+      )
+    }
+  }
+}
+
+write_figure &lt;- function(filename, width, height, draw) {
+  grDevices::png(
+    paste0(filename, &quot;.png&quot;), width = width * 180,
+    height = height * 180, res = 180
+  )
+  draw()
+  grDevices::dev.off()
+  grDevices::pdf(paste0(filename, &quot;.pdf&quot;), width = width, height = height)
+  draw()
+  grDevices::dev.off()
+}
+
+write_figure(paste0(output_stem, &quot;-estimated-eta0&quot;), 6.5, 5.3, draw_eta0)
+write_figure(paste0(output_stem, &quot;-coverage-power&quot;), 10, 4.7,
+             draw_performance)
+utils::write.csv(results, paste0(output_stem, &quot;-results.csv&quot;), row.names = FALSE)
+utils::write.csv(
+  summary_table, paste0(output_stem, &quot;-summary.csv&quot;), row.names = FALSE
+)
+saveRDS(
+  list(
+    settings = list(
+      seed = seed, J = J, replications = number_of_replications,
+      N0 = N0, N = N, h2 = h2, true_lambda = true_lambda,
+      true_eta0_grid = true_eta0_grid, true_L = true_L,
+      effect_weights = effect_weights, lambda_grid = lambda_grid,
+      collapsed_eta0_multiplier = collapsed_eta0_multiplier,
+      aiwn_eta0_multiplier = aiwn_eta0_multiplier
+    ),
+    R0 = R0, results = results, summary = summary_table
+  ),
+  paste0(output_stem, &quot;.rds&quot;)
+)
+
+cat(&quot;\nSummary\n&quot;)
+print(summary_table, row.names = FALSE, digits = 4)
+cat(&quot;\nMedian absolute causal LD:&quot;, median(abs(results$causal_LD)), &quot;\n&quot;)
+cat(&quot;Expected |z| range:&quot;,
+    range(c(results$expected_z_weaker, results$expected_z_stronger)), &quot;\n&quot;)
+
+draw_eta0()
+draw_performance()
+}</code></pre>
+<pre><code>
+Summary
+ coverage coverage_lower coverage_upper power power_lower power_upper true_eta0
+       NA             NA             NA 0.000       0.000       0.000        25
+   1.0000         1.0000           1.00 0.525       0.500       0.575        25
+   0.9524         0.8696           1.00 0.525       0.500       0.575        25
+       NA             NA             NA 0.000       0.000       0.000        50
+   0.9130         0.7727           1.00 0.525       0.425       0.650        50
+   0.8148         0.6786           0.96 0.550       0.450       0.675        50
+       NA             NA             NA 0.000       0.000       0.000       100
+   0.9615         0.8750           1.00 0.625       0.525       0.750       100
+   0.9118         0.8182           1.00 0.775       0.650       0.875       100
+       NA             NA             NA 0.000       0.000       0.000       200
+   1.0000         1.0000           1.00 0.950       0.875       1.000       200
+   0.9250         0.8138           1.00 0.925       0.850       1.000       200
+   1.0000         1.0000           1.00 0.400       0.200       0.600       400
+   0.9750         0.9250           1.00 0.975       0.925       1.000       400
+   0.9512         0.8810           1.00 0.975       0.925       1.000       400
+   1.0000         1.0000           1.00 0.825       0.725       0.925       800
+   1.0000         1.0000           1.00 1.000       1.000       1.000       800
+   0.9750         0.9250           1.00 0.975       0.925       1.000       800
+                method median_estimated_eta0 eta0_q25  eta0_q75 mean_reported_L
+ Null posterior-mean R                0.9773   0.8613 1.187e+00            0.00
+           collapsed-R                5.8590   3.7305 8.442e+00            1.00
+                 AIW-N               11.8756  10.3313 1.590e+01            1.05
+ Null posterior-mean R                1.8356   1.5632 2.156e+00            0.00
+           collapsed-R               19.4467  13.7725 3.076e+01            1.15
+                 AIW-N               28.7880  23.7978 5.615e+01            1.35
+ Null posterior-mean R                3.0139   2.4809 3.843e+00            0.00
+           collapsed-R               38.5112  30.8670 5.488e+01            1.30
+                 AIW-N               62.0218  42.3262 9.076e+01            1.70
+ Null posterior-mean R                8.7076   7.1130 1.052e+01            0.00
+           collapsed-R              123.0293  83.6982 1.457e+02            1.90
+                 AIW-N              180.0105 159.7127 2.025e+02            2.00
+ Null posterior-mean R               36.0523  19.4340 6.463e+01            0.60
+           collapsed-R              254.5737 223.7227 3.123e+02            2.00
+                 AIW-N              309.7009 269.9778 3.797e+02            2.05
+ Null posterior-mean R              251.7108 123.0402 1.000e+08            1.55
+           collapsed-R              466.3841 391.0372 8.291e+02            2.00
+                 AIW-N              521.0979 423.0133 9.672e+02            2.00
+ mean_false_sets fallback_frequency
+            0.00               0.00
+            0.00               1.00
+            0.05               0.95
+            0.00               0.00
+            0.10               0.85
+            0.25               0.65
+            0.00               0.00
+            0.05               0.70
+            0.15               0.30
+            0.00               0.00
+            0.00               0.10
+            0.15               0.05
+            0.00               0.00
+            0.05               0.00
+            0.10               0.00
+            0.00               0.00
+            0.00               0.00
+            0.05               0.00
+
+Median absolute causal LD: 0.0008277233 
+Expected |z| range: 8.176412 11.51944 </code></pre>
+<p><img src="figure/03-compare-null-estimate-R.Rmd/analysis-1.png" alt="" width="672" style="display: block; margin: auto;" /><img src="figure/03-compare-null-estimate-R.Rmd/analysis-2.png" alt="" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.5.2 (2025-10-31)
+Platform: aarch64-apple-darwin20
+Running under: macOS Tahoe 26.5.1
+
+Matrix products: default
+BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: America/Chicago
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.7.2
+
+loaded via a namespace (and not attached):
+ [1] generics_0.1.4     sass_0.4.10        stringi_1.8.7      lattice_0.22-7    
+ [5] digest_0.6.39      magrittr_2.0.4     evaluate_1.0.5     grid_4.5.2        
+ [9] RColorBrewer_1.1-3 fastmap_1.2.0      plyr_1.8.9         rprojroot_2.1.1   
+[13] jsonlite_2.0.0     Matrix_1.7-4       processx_3.8.6     whisker_0.4.1     
+[17] reshape_0.8.10     mixsqp_0.3-54      ps_1.9.1           promises_1.5.0    
+[21] httr_1.4.8         scales_1.4.0       jquerylib_0.1.4    cli_3.6.6         
+[25] rlang_1.3.0        zigg_0.0.2         crayon_1.5.3       susieR_0.16.6     
+[29] cachem_1.1.0       yaml_2.3.12        otel_0.2.0         tools_4.5.2       
+[33] dplyr_1.2.0        ggplot2_4.0.3      httpuv_1.6.17      Rfast_2.1.5.2     
+[37] reticulate_1.46.0  vctrs_0.7.3        R6_2.6.1           png_0.1-9         
+[41] matrixStats_1.5.0  lifecycle_1.0.5    git2r_0.36.2       stringr_1.6.0     
+[45] fs_2.1.0           irlba_2.3.7        pkgconfig_2.0.3    callr_3.8.0       
+[49] RcppParallel_6.2.0 pillar_1.11.1      bslib_0.10.0       later_1.4.8       
+[53] gtable_0.3.6       glue_1.8.1         Rcpp_1.1.2         tidyselect_1.2.1  
+[57] xfun_0.56          tibble_3.3.1       rstudioapi_0.18.0  knitr_1.51        
+[61] farver_2.1.2       htmltools_0.5.9    rmarkdown_2.30     compiler_4.5.2    
+[65] S7_0.2.2           getPass_0.2-4     </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

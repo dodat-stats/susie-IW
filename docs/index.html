@@ -32,6 +32,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
 <!-- Add a small amount of space between sections. -->
@@ -263,7 +265,13 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/dodat-stats/susie-IW">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -349,13 +357,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong8cd455e">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a">
 <span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>Repository version:</strong> 8cd455e
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>
 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong8cd455e"
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -364,7 +374,8 @@ and connecting the code version to the results is critical for
 reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 8cd455e.
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -378,7 +389,12 @@ depends on. Below is the status of the Git repository when the results
 were generated:
 </p>
 <pre><code>
-working directory clean
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    analysis/.DS_Store
+    Ignored:    experiments/.DS_Store
+    Ignored:    plos-paper/
+
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not
@@ -426,7 +442,41 @@ Message
 Rmd
 </td>
 <td>
-8cd455e
+<a href="https://github.com/dodat-stats/susie-IW/blob/e430a953742f2347c05c937d2992765aaf663919/analysis/index.Rmd" target="_blank">e430a95</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-08-20
+</td>
+<td>
+Add SuSiE-IW analyses and experiment results
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/dodat-stats/susie-IW/f98785a2fcbdee6f2039d27957dbe2114da2693f/docs/index.html" target="_blank">f98785a</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-08-20
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie-IW/blob/8cd455eeb2d23a23b1e356034e53a00b90cf9ef1/analysis/index.Rmd" target="_blank">8cd455e</a>
 </td>
 <td>
 dodat-stats
@@ -445,7 +495,51 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p>Welcome to my research website.</p>
+<p>This project develops mismatch-aware fine-mapping for GWAS summary
+statistics analyzed with external reference LD. Its goals are to measure
+mismatch, recover reference-LD SuSiE-RSS when the inputs are matched,
+and avoid spurious additional signals when they are mismatched.</p>
+<p>When the mismatch-aware fit returns zero or one deduplicated,
+purity-passing credible set, the operational procedure reports a 95%
+credible set from a single-effect RSS refit using only the unit
+diagonal. This fallback is a locus-level summary for loci already
+established as associated; it does not test association or assert that
+exactly one causal variant is present.</p>
+<div id="reproducible-paper-experiments" class="section level2">
+<h2>Reproducible paper experiments</h2>
+<p>The primary simulation uses reproducible coalescent reference LD
+generated with <code>stdpopsim</code> and <code>msprime</code>;
+in-sample LD and summary statistics are then generated from the SuSiE-IW
+model. The study crosses one, two and three true effects with a range of
+true mismatch concentrations and compares in-sample SuSiE-RSS,
+reference-LD SuSiE-RSS, collapsed-R and AIW-N.</p>
+<p>Run the full concentration calibration, independent performance
+benchmark, summaries and paper figures with:</p>
+<pre class="bash"><code>Rscript --vanilla experiments/run-paper-coalescent-experiments.R</code></pre>
+<p>Worker-level results are checkpointed, so the command resumes
+completed jobs after interruption. The principal numerical summary is in
+<code>experiments/coalescent-susie-iw-benchmark-report.md</code>; the
+complete design and frozen calibration constants are documented in the
+supplementary manuscript.</p>
+<p>Earlier development experiments are retained in a local-only archive
+and are not invoked by the current manuscript workflows.</p>
+</div>
+<div id="collaborator-demonstrations" class="section level2">
+<h2>Collaborator demonstrations</h2>
+<ul>
+<li><a href="01-demonstration.html">AR SuSiE-IW demonstration</a></li>
+<li><a href="02-coalescent-IW-simulation.html">Coalescent SuSiE-IW
+simulation</a></li>
+<li><a href="03-compare-null-estimate-R.html">Comparison with a null
+posterior-mean LD estimate</a></li>
+<li><a href="04-null-estimate-R-demonstration.html">Single-dataset
+null-estimate-R demonstration</a></li>
+<li><a href="05-compare-susie-rss.html">Comparison with the susieR EB
+mismatch correction</a></li>
+<li><a href="06-heuristic-collapsed-R.html">Correlation-standardized
+collapsed-R heuristic</a></li>
+</ul>
+</div>
 </div>
 </div>
 </div>

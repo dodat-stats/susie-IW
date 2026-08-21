@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Dat Do" />
+
+<meta name="date" content="2026-08-20" />
+
+<title>Comparison with the susieR empirical-Bayes mismatch correction</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">susie-IW</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dodat-stats/susie-IW">
+    <span class="fab fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Comparison with the susieR empirical-Bayes
+mismatch correction</h1>
+<h4 class="author">Dat Do</h4>
+<h4 class="date">2026-08-20</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-08-20
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>susie-IW/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20260820code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20260820)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20260820code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20260820)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomdodatstatssusieIWtreee430a953742f2347c05c937d2992765aaf663919targetblanke430a95a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/dodat-stats/susie-IW/tree/e430a953742f2347c05c937d2992765aaf663919" target="_blank">e430a95</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    analysis/.DS_Store
+    Ignored:    experiments/.DS_Store
+    Ignored:    plos-paper/
+
+Unstaged changes:
+    Modified:   experiments/03-null-estimate-R-coverage-power.pdf
+    Modified:   experiments/03-null-estimate-R-estimated-eta0.pdf
+    Modified:   experiments/04-null-estimate-R-demonstration-PIP.pdf
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/05-compare-susie-rss.Rmd</code>)
+and HTML (<code>docs/05-compare-susie-rss.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/dodat-stats/susie-IW/blob/e430a953742f2347c05c937d2992765aaf663919/analysis/05-compare-susie-rss.Rmd" target="_blank">e430a95</a>
+</td>
+<td>
+dodat-stats
+</td>
+<td>
+2026-08-20
+</td>
+<td>
+Add SuSiE-IW analyses and experiment results
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>This page compares the project’s mismatch-aware methods with the
+empirical- Bayes LD mismatch correction in
+<code>susieR::susie_rss()</code>. The simulation matches the <a
+href="02-coalescent-IW-simulation.html">coalescent SuSiE-IW
+simulation</a>: coalescent reference LD is followed by a
+correlation-standardized inverse-Wishart draw of the in-sample LD matrix
+and SuSiE-IW summary statistics with two or three causal effects.</p>
+<p>The susieR fit follows the official <a
+href="https://stephenslab.github.io/susieR/articles/rss_mismatch.html#empirical-bayes-mismatch-correction">LD
+mismatch workflow</a>:</p>
+<pre class="r"><code>susie_rss(..., R_finite = N0, R_mismatch = &quot;eb&quot;)</code></pre>
+<p><code>R_finite</code> accounts for estimation noise from the finite
+reference panel, and <code>R_mismatch = "eb"</code> estimates an
+additional region-wide mismatch component. The analysis reports
+<code>R_finite_diagnostics</code> because the corrected result should
+not be treated as automatically reliable.</p>
+<p>The five comparisons are in-sample SuSiE-RSS, reference-LD SuSiE-RSS,
+reference-LD SuSiE-RSS with finite-panel and empirical-Bayes mismatch
+correction, collapsed-<span class="math inline">\(R\)</span>, and AIW-N.
+This page requires a susieR version that provides <code>R_finite</code>,
+<code>R_mismatch</code>, and <code>susie_rss_control</code> (version
+0.16.6 or newer at the time this page was written).</p>
+<p>Set <code>run_analysis: false</code> in the YAML header to skip the
+computationally nontrivial coalescent simulation and fits during a
+workflowr build.</p>
+<div id="analysis" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Analysis</h2>
+<pre class="r"><code>find_project_root &lt;- function(path = getwd()) {
+  path &lt;- normalizePath(path, mustWork = TRUE)
+  repeat {
+    required &lt;- c(
+      file.path(path, &quot;code&quot;, &quot;01-collapsed-R.R&quot;),
+      file.path(path, &quot;code&quot;, &quot;02-AIW-and-AIW-N.R&quot;),
+      file.path(path, &quot;code&quot;, &quot;03-SER-fallback-and-plot.R&quot;)
+    )
+    if (all(file.exists(required))) return(path)
+    parent &lt;- dirname(path)
+    if (identical(parent, path)) {
+      stop(&quot;Could not find the susie-IW project root&quot;)
+    }
+    path &lt;- parent
+  }
+}
+
+project_root &lt;- find_project_root()
+source(file.path(project_root, &quot;code&quot;, &quot;01-collapsed-R.R&quot;))
+source(file.path(project_root, &quot;code&quot;, &quot;02-AIW-and-AIW-N.R&quot;))
+source(file.path(project_root, &quot;code&quot;, &quot;03-SER-fallback-and-plot.R&quot;))
+
+if (!requireNamespace(&quot;susieR&quot;, quietly = TRUE)) {
+  stop(&quot;Install the current susieR package before running this comparison&quot;)
+}
+required_susie_rss_arguments &lt;- c(&quot;R_finite&quot;, &quot;R_mismatch&quot;, &quot;control&quot;)
+missing_susie_rss_arguments &lt;- setdiff(
+  required_susie_rss_arguments,
+  names(formals(susieR::susie_rss))
+)
+if (length(missing_susie_rss_arguments)) {
+  stop(
+    &quot;Installed susieR &quot;, as.character(utils::packageVersion(&quot;susieR&quot;)),
+    &quot; does not support the current mismatch interface (missing: &quot;,
+    paste(missing_susie_rss_arguments, collapse = &quot;, &quot;), &quot;). &quot;,
+    &quot;Install susieR &gt;= 0.16.6, for example with &quot;,
+    &quot;remotes::install_github(&#39;stephenslab/susieR&#39;).&quot;
+  )
+}
+
+# -------------------------------------------------------------------------
+# Simulation and fitting settings. Edit this block to select the experiment.
+# -------------------------------------------------------------------------
+
+seed &lt;- 8L
+J &lt;- 1000L
+N0 &lt;- 2000L                       # reference-panel sample size
+coalescent_sample_size &lt;- 2000L   # second population used for common-SNP QC
+N &lt;- 200000L                      # GWAS sample size
+true_eta0 &lt;- 200
+h2 &lt;- 1e-3
+true_lambda &lt;- 1e-3
+true_L_values &lt;- c(2L, 3L)
+maximum_fitted_L &lt;- 5L
+
+lambda_grid &lt;- c(1e-5, 1e-4, 1e-3, 2e-3, 4e-3, 6e-3, 8e-3, 1e-2)
+collapsed_eta0_multiplier &lt;- 1.677
+aiwn_eta0_multiplier &lt;- 1.424
+
+if (J &lt;= max(true_L_values) || maximum_fitted_L &lt; max(true_L_values) ||
+    maximum_fitted_L &gt;= J) {
+  stop(&quot;Require max(true_L_values) &lt;= maximum_fitted_L &lt; J&quot;)
+}
+
+output_root &lt;- file.path(project_root, &quot;experiments&quot;)
+figure_directory &lt;- file.path(output_root, &quot;figures&quot;)
+dir.create(figure_directory, recursive = TRUE, showWarnings = FALSE)
+output_prefix &lt;- file.path(output_root, &quot;05-compare-susie-rss&quot;)
+figure_prefix &lt;- file.path(figure_directory, &quot;05-compare-susie-rss&quot;)
+
+# -------------------------------------------------------------------------
+# Generate empirical reference LD from the same human coalescent model used in
+# analysis/02-coalescent-IW-simulation.Rmd.
+# -------------------------------------------------------------------------
+
+simulate_coalescent_R0 &lt;- function(
+    J, N0, second_population_size = N0, seed = 1L,
+    chromosome = &quot;chr22&quot;, start = 20e6, end = 21e6,
+    split_time = 10L) {
+  if (!requireNamespace(&quot;reticulate&quot;, quietly = TRUE)) {
+    stop(&quot;Install the R package reticulate&quot;)
+  }
+  if (!nzchar(Sys.getenv(&quot;RETICULATE_PYTHON&quot;))) {
+    python &lt;- Sys.which(&quot;python3&quot;)
+    if (nzchar(python)) {
+      Sys.setenv(RETICULATE_PYTHON = python)
+      reticulate::use_python(python, required = FALSE)
+    }
+  }
+  stdpopsim &lt;- reticulate::import(&quot;stdpopsim&quot;)
+  msprime &lt;- reticulate::import(&quot;msprime&quot;)
+
+  species &lt;- stdpopsim$get_species(&quot;HomSap&quot;)
+  contig &lt;- species$get_contig(
+    chromosome, left = as.integer(start), right = as.integer(end)
+  )
+  demography &lt;- msprime$Demography()
+  demography$add_population(name = &quot;ANC&quot;, initial_size = 20000L)
+  demography$add_population(name = &quot;POP1&quot;, initial_size = 100000L)
+  demography$add_population(name = &quot;POP2&quot;, initial_size = 100000L)
+  demography$add_population_split(
+    time = as.integer(split_time),
+    derived = list(&quot;POP1&quot;, &quot;POP2&quot;), ancestral = &quot;ANC&quot;
+  )
+
+  models &lt;- list(
+    msprime$DiscreteTimeWrightFisher(duration = 100L),
+    msprime$StandardCoalescent()
+  )
+  tree_sequence &lt;- msprime$sim_ancestry(
+    samples = reticulate::dict(
+      POP1 = as.integer(second_population_size),
+      POP2 = as.integer(N0)
+    ),
+    demography = demography,
+    recombination_rate = contig$recombination_map,
+    model = models,
+    random_seed = as.integer(seed)
+  )
+  tree_sequence &lt;- msprime$sim_mutations(
+    tree_sequence, rate = 1.29e-8, random_seed = 1L
+  )
+
+  population_ids &lt;- list()
+  for (population in reticulate::iterate(tree_sequence$populations())) {
+    population_ids[[population$metadata$name]] &lt;- population$id
+  }
+  genotype_haploid &lt;- tree_sequence$genotype_matrix()
+  to_diploid &lt;- function(sample_ids) {
+    columns &lt;- as.integer(sample_ids) + 1L
+    haplotypes &lt;- genotype_haploid[, columns, drop = FALSE]
+    genotypes &lt;- haplotypes[, seq(1L, ncol(haplotypes), by = 2L)] +
+      haplotypes[, seq(2L, ncol(haplotypes), by = 2L)]
+    t(genotypes)
+  }
+  genotype_1 &lt;- to_diploid(tree_sequence$samples(
+    population = as.integer(population_ids$POP1)
+  ))
+  genotype_0 &lt;- to_diploid(tree_sequence$samples(
+    population = as.integer(population_ids$POP2)
+  ))
+
+  frequency_1 &lt;- colMeans(genotype_1) / 2
+  frequency_0 &lt;- colMeans(genotype_0) / 2
+  common &lt;- frequency_1 &gt; 0.05 &amp; frequency_1 &lt; 0.95 &amp;
+    frequency_0 &gt; 0.05 &amp; frequency_0 &lt; 0.95
+  genotype_0 &lt;- genotype_0[, common, drop = FALSE]
+  if (ncol(genotype_0) &lt; J) {
+    stop(&quot;The coalescent region contains fewer than J common variants&quot;)
+  }
+
+  set.seed(seed)
+  first_column &lt;- if (ncol(genotype_0) == J) {
+    1L
+  } else {
+    sample.int(ncol(genotype_0) - J + 1L, 1L)
+  }
+  columns &lt;- first_column + seq_len(J) - 1L
+  R0 &lt;- stats::cor(genotype_0[, columns, drop = FALSE])
+  R0 &lt;- (R0 + t(R0)) / 2
+  diag(R0) &lt;- 1
+  R0
+}
+
+message(&quot;Generating coalescent reference LD&quot;)
+R0 &lt;- simulate_coalescent_R0(
+  J = J, N0 = N0, second_population_size = coalescent_sample_size,
+  seed = seed
+)
+
+# -------------------------------------------------------------------------
+# Draw in-sample LD under the correlation-standardized SuSiE-IW simulation.
+# -------------------------------------------------------------------------
+
+Rbar_true &lt;- (1 - true_lambda) * R0 + true_lambda * diag(J)
+set.seed(2000000L + 10000L * seed + J + as.integer(true_eta0))
+precision &lt;- stats::rWishart(
+  1L,
+  df = true_eta0 + J + 1L,
+  Sigma = solve(true_eta0 * Rbar_true)
+)[, , 1L]
+R &lt;- stats::cov2cor(solve(precision))
+R &lt;- (R + t(R)) / 2
+diag(R) &lt;- 1
+
+choose_nested_weak_ld_variants &lt;- function(R) {
+  candidates &lt;- unique(as.integer(round(seq(
+    max(2, 0.08 * nrow(R)), min(nrow(R) - 1, 0.92 * nrow(R)),
+    length.out = min(250L, nrow(R) - 2L)
+  ))))
+  minimum_separation &lt;- max(8L, floor(nrow(R) / 12))
+  first &lt;- candidates[which.min(abs(candidates - round(nrow(R) / 4)))]
+  available &lt;- candidates[abs(candidates - first) &gt;= minimum_separation]
+  second &lt;- available[which.min(abs(R[first, available]))]
+  available &lt;- candidates[
+    abs(candidates - first) &gt;= minimum_separation &amp;
+      abs(candidates - second) &gt;= minimum_separation
+  ]
+  third &lt;- available[which.min(vapply(available, function(j) {
+    max(abs(R[j, c(first, second)]))
+  }, numeric(1L)))]
+  c(first, second, third)
+}
+
+causal_candidates &lt;- choose_nested_weak_ld_variants(R)
+set.seed(2500000L + 10000L * seed + J + as.integer(true_eta0))
+noise &lt;- as.numeric(t(chol(R)) %*% stats::rnorm(J)) / sqrt(N)
+
+simulate_architecture &lt;- function(true_L) {
+  stopifnot(true_L %in% true_L_values)
+  causal &lt;- causal_candidates[seq_len(true_L)]
+  weights &lt;- c(7, 5, 3)[seq_len(true_L)]
+  effect_scale &lt;- sqrt(
+    h2 / drop(crossprod(
+      weights, R[causal, causal, drop = FALSE] %*% weights
+    ))
+  )
+  beta &lt;- numeric(J)
+  beta[causal] &lt;- effect_scale * weights
+  v &lt;- as.numeric(R %*% beta + noise)
+  list(
+    true_L = true_L,
+    causal = causal,
+    beta = beta,
+    v = v,
+    causal_LD = R[causal, causal, drop = FALSE],
+    expected_z = sqrt(N) * as.numeric(
+      R[causal, , drop = FALSE] %*% beta
+    )
+  )
+}
+
+simulations &lt;- setNames(
+  lapply(true_L_values, simulate_architecture),
+  paste0(&quot;L&quot;, true_L_values)
+)
+
+# -------------------------------------------------------------------------
+# Fit the four existing comparison methods plus susie_rss with finite-panel
+# uncertainty and empirical-Bayes mismatch correction.
+# -------------------------------------------------------------------------
+
+fit_susie_rss_eb_mismatch &lt;- function(v, R0, N, N0, L) {
+  z &lt;- iw_z_from_v(v, N)
+  susieR::susie_rss(
+    z = z,
+    R = R0,
+    n = N,
+    L = as.integer(L),
+    scaled_prior_variance = 0.2,
+    estimate_prior_variance = TRUE,
+    coverage = 0.95,
+    min_abs_corr = 0.5,
+    max_iter = 500L,
+    tol = 1e-3,
+    R_finite = N0,
+    R_mismatch = &quot;eb&quot;,
+    track_fit = TRUE
+  )
+}
+
+fit_architecture &lt;- function(simulation) {
+  v &lt;- simulation$v
+  list(
+    &quot;SuSiE-RSS: in-sample R&quot; = fit_susie_rss(
+      v = v, R = R, N = N, L = maximum_fitted_L
+    ),
+    &quot;SuSiE-RSS: reference R0&quot; = fit_susie_rss(
+      v = v, R = R0, N = N, L = maximum_fitted_L
+    ),
+    &quot;SuSiE-RSS: finite R0 + EB mismatch&quot; = fit_susie_rss_eb_mismatch(
+      v = v, R0 = R0, N = N, N0 = N0, L = maximum_fitted_L
+    ),
+    &quot;Collapsed-R&quot; = susie_iw(
+      v = v, R0 = R0, N = N, L = maximum_fitted_L,
+      lambda_grid = lambda_grid,
+      eta0_multiplier = collapsed_eta0_multiplier,
+      scaled_prior_variance = 0.2,
+      estimate_prior_variance = TRUE,
+      coverage = 0.95, min_abs_corr = 0.5,
+      ser_fallback = TRUE,
+      max_iter = 200L, tol = 1e-4, verbose = FALSE
+    ),
+    &quot;AIW-N&quot; = suppressMessages(susie_aiw(
+      v = v, R0 = R0, N = N, L = maximum_fitted_L,
+      approximation = &quot;N&quot;,
+      lambda_grid = lambda_grid,
+      eta0_multiplier = aiwn_eta0_multiplier,
+      scaled_prior_variance = 0.2,
+      estimate_prior_variance = TRUE,
+      coverage = 0.95, min_abs_corr = 0.5,
+      ser_fallback = TRUE,
+      max_iter = 500L, tol = 1e-3, verbose = FALSE
+    ))
+  )
+}
+
+fits &lt;- lapply(names(simulations), function(label) {
+  message(&quot;Fitting architecture &quot;, label)
+  fit_architecture(simulations[[label]])
+})
+names(fits) &lt;- names(simulations)
+
+# -------------------------------------------------------------------------
+# Numerical summaries, including the reliability diagnostics emphasized in the
+# official susieR vignette.
+# -------------------------------------------------------------------------
+
+summarize_architecture &lt;- function(label, simulation, fitted_methods) {
+  table &lt;- do.call(rbind, Map(function(method, fit) {
+    row &lt;- summarize_iw_fit(fit, causal = simulation$causal)
+    row$architecture &lt;- label
+    row$method &lt;- method
+    row
+  }, names(fitted_methods), fitted_methods))
+  rownames(table) &lt;- NULL
+  table[, c(
+    &quot;architecture&quot;, &quot;method&quot;,
+    setdiff(names(table), c(&quot;architecture&quot;, &quot;method&quot;))
+  )]
+}
+
+summary_table &lt;- do.call(rbind, lapply(names(fits), function(label) {
+  summarize_architecture(label, simulations[[label]], fits[[label]])
+}))
+rownames(summary_table) &lt;- NULL
+
+numeric_scalar &lt;- function(value) {
+  if (is.null(value) || !length(value)) return(NA_real_)
+  as.numeric(value[1L])
+}
+
+logical_scalar &lt;- function(value) {
+  if (is.null(value) || !length(value)) return(NA)
+  as.logical(value[1L])
+}
+
+character_scalar &lt;- function(value) {
+  if (is.null(value) || !length(value)) return(NA_character_)
+  as.character(value[1L])
+}
+
+eb_diagnostic_table &lt;- do.call(rbind, lapply(names(fits), function(label) {
+  fit &lt;- fits[[label]][[&quot;SuSiE-RSS: finite R0 + EB mismatch&quot;]]
+  diagnostics &lt;- fit$R_finite_diagnostics
+  data.frame(
+    architecture = label,
+    susieR_version = as.character(utils::packageVersion(&quot;susieR&quot;)),
+    R_finite = numeric_scalar(diagnostics$B),
+    R_mismatch = character_scalar(diagnostics$R_mismatch),
+    mismatch_estimator = character_scalar(fit$R_mismatch_method),
+    lambda_bias = numeric_scalar(fit$lambda_bias),
+    corrected_reference_size = numeric_scalar(fit$B_corrected),
+    Q_art = numeric_scalar(diagnostics$Q_art),
+    residual_artifact_flag = logical_scalar(diagnostics$artifact_flag),
+    CS_sensitivity_flag = logical_scalar(diagnostics$R_sensitivity_flag),
+    overall_reliability_flag = logical_scalar(
+      diagnostics$R_reliability_flag
+    ),
+    convergence_reason = character_scalar(fit$convergence_reason),
+    converged = logical_scalar(fit$converged),
+    iterations = numeric_scalar(fit$niter),
+    stringsAsFactors = FALSE
+  )
+}))
+rownames(eb_diagnostic_table) &lt;- NULL
+
+generating_table &lt;- do.call(rbind, lapply(names(simulations), function(label) {
+  simulation &lt;- simulations[[label]]
+  data.frame(
+    architecture = label,
+    true_L = simulation$true_L,
+    causal = paste(simulation$causal, collapse = &quot;,&quot;),
+    expected_abs_z = paste(round(abs(simulation$expected_z), 2), collapse = &quot;,&quot;),
+    max_abs_causal_LD = max(abs(
+      simulation$causal_LD[upper.tri(simulation$causal_LD)]
+    )),
+    stringsAsFactors = FALSE
+  )
+}))
+rownames(generating_table) &lt;- NULL
+
+utils::write.csv(
+  summary_table, paste0(output_prefix, &quot;-summary.csv&quot;), row.names = FALSE
+)
+utils::write.csv(
+  eb_diagnostic_table,
+  paste0(output_prefix, &quot;-eb-diagnostics.csv&quot;),
+  row.names = FALSE
+)
+utils::write.csv(
+  generating_table,
+  paste0(output_prefix, &quot;-generating-settings.csv&quot;),
+  row.names = FALSE
+)
+
+cat(&quot;\nMethod comparison\n&quot;)</code></pre>
+<pre><code>
+Method comparison</code></pre>
+<pre class="r"><code>print(summary_table, row.names = FALSE, digits = 4)</code></pre>
+<pre><code> architecture                             method selected_lambda raw_eta0
+           L2             SuSiE-RSS: in-sample R              NA       NA
+           L2            SuSiE-RSS: reference R0              NA       NA
+           L2 SuSiE-RSS: finite R0 + EB mismatch              NA       NA
+           L2                        Collapsed-R           0.002   120.03
+           L2                              AIW-N           0.002   236.57
+           L3             SuSiE-RSS: in-sample R              NA       NA
+           L3            SuSiE-RSS: reference R0              NA       NA
+           L3 SuSiE-RSS: finite R0 + EB mismatch              NA       NA
+           L3                        Collapsed-R           0.002    85.33
+           L3                              AIW-N           0.002   161.38
+ eta0_used model_L reported_L fallback partitioned_SER causal_coverage
+        NA       5          2    FALSE           FALSE          1.0000
+        NA       5          3    FALSE           FALSE          1.0000
+        NA       5          2    FALSE           FALSE          1.0000
+     201.3       5          2    FALSE           FALSE          1.0000
+     336.9       5          3    FALSE           FALSE          1.0000
+        NA       5          3    FALSE           FALSE          1.0000
+        NA       5          4    FALSE           FALSE          1.0000
+        NA       5          3    FALSE           FALSE          1.0000
+     143.1       5          1     TRUE           FALSE          0.3333
+     229.8       3          3    FALSE           FALSE          1.0000
+ all_causal_covered false_sets
+               TRUE          0
+               TRUE          1
+               TRUE          0
+               TRUE          0
+               TRUE          1
+               TRUE          0
+               TRUE          1
+               TRUE          0
+              FALSE          0
+               TRUE          0</code></pre>
+<pre class="r"><code>cat(&quot;\nsusie_rss empirical-Bayes mismatch diagnostics\n&quot;)</code></pre>
+<pre><code>
+susie_rss empirical-Bayes mismatch diagnostics</code></pre>
+<pre class="r"><code>print(eb_diagnostic_table, row.names = FALSE, digits = 5)</code></pre>
+<pre><code> architecture susieR_version R_finite R_mismatch mismatch_estimator lambda_bias
+           L2         0.16.6     2000         eb                mle   0.0034054
+           L3         0.16.6     2000         eb                mle   0.0021969
+ corrected_reference_size     Q_art residual_artifact_flag CS_sensitivity_flag
+                   256.06 0.0063609                  FALSE               FALSE
+                   370.80 0.0078580                  FALSE               FALSE
+ overall_reliability_flag    convergence_reason converged iterations
+                    FALSE alpha_pip_fixed_point      TRUE         11
+                    FALSE alpha_pip_fixed_point      TRUE         18</code></pre>
+<pre class="r"><code>cat(&quot;\nGenerating architectures\n&quot;)</code></pre>
+<pre><code>
+Generating architectures</code></pre>
+<pre class="r"><code>print(generating_table, row.names = FALSE, digits = 4)</code></pre>
+<pre><code> architecture true_L      causal  expected_abs_z max_abs_causal_LD
+           L2      2     249,627      11.51,8.22         0.0005557
+           L3      3 249,627,755 10.88,7.73,4.57         0.0099150</code></pre>
+<pre class="r"><code># -------------------------------------------------------------------------
+# PIP and credible-set comparisons.
+# -------------------------------------------------------------------------
+
+plot_items_for_architecture &lt;- function(label) {
+  current_fits &lt;- fits[[label]]
+  list(
+    &quot;SuSiE-RSS: in-sample R&quot; = list(
+      object = current_fits[[&quot;SuSiE-RSS: in-sample R&quot;]], R = R
+    ),
+    &quot;SuSiE-RSS: reference R0&quot; = list(
+      object = current_fits[[&quot;SuSiE-RSS: reference R0&quot;]], R = R0
+    ),
+    &quot;SuSiE-RSS: finite R0 + EB mismatch&quot; = list(
+      object = current_fits[[&quot;SuSiE-RSS: finite R0 + EB mismatch&quot;]], R = R0
+    ),
+    &quot;Collapsed-R&quot; = list(
+      object = current_fits[[&quot;Collapsed-R&quot;]],
+      R = current_fits[[&quot;Collapsed-R&quot;]]$selected_Rbar
+    ),
+    &quot;AIW-N&quot; = list(
+      object = current_fits[[&quot;AIW-N&quot;]],
+      R = current_fits[[&quot;AIW-N&quot;]]$selected_Rbar
+    )
+  )
+}
+
+draw_architecture &lt;- function(label) {
+  plot_iw_comparison(
+    plot_items_for_architecture(label),
+    causal = simulations[[label]]$causal,
+    ncol = 2L,
+    main = paste0(&quot;Coalescent SuSiE-IW comparison: &quot;, label)
+  )
+}
+
+for (label in names(fits)) {
+  filename &lt;- paste0(figure_prefix, &quot;-&quot;, label)
+  grDevices::png(
+    paste0(filename, &quot;.png&quot;), width = 1800, height = 2100, res = 180
+  )
+  draw_architecture(label)
+  grDevices::dev.off()
+  grDevices::pdf(paste0(filename, &quot;.pdf&quot;), width = 10, height = 11.7)
+  draw_architecture(label)
+  grDevices::dev.off()
+}
+
+# Draw the two comparisons again so knitr captures them in the rendered page.
+for (label in names(fits)) draw_architecture(label)</code></pre>
+<p><img src="figure/05-compare-susie-rss.Rmd/analysis-1.png" alt="" width="960" style="display: block; margin: auto;" /><img src="figure/05-compare-susie-rss.Rmd/analysis-2.png" alt="" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>message(&quot;Wrote comparison outputs with prefix: &quot;, output_prefix)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.5.2 (2025-10-31)
+Platform: aarch64-apple-darwin20
+Running under: macOS Tahoe 26.5.1
+
+Matrix products: default
+BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+
+time zone: America/Chicago
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.7.2
+
+loaded via a namespace (and not attached):
+ [1] generics_0.1.4     sass_0.4.10        stringi_1.8.7      lattice_0.22-7    
+ [5] digest_0.6.39      magrittr_2.0.4     evaluate_1.0.5     grid_4.5.2        
+ [9] RColorBrewer_1.1-3 fastmap_1.2.0      plyr_1.8.9         rprojroot_2.1.1   
+[13] jsonlite_2.0.0     Matrix_1.7-4       processx_3.8.6     whisker_0.4.1     
+[17] reshape_0.8.10     mixsqp_0.3-54      ps_1.9.1           promises_1.5.0    
+[21] httr_1.4.8         scales_1.4.0       jquerylib_0.1.4    cli_3.6.6         
+[25] rlang_1.3.0        zigg_0.0.2         crayon_1.5.3       susieR_0.16.6     
+[29] cachem_1.1.0       yaml_2.3.12        otel_0.2.0         tools_4.5.2       
+[33] dplyr_1.2.0        ggplot2_4.0.3      httpuv_1.6.17      Rfast_2.1.5.2     
+[37] reticulate_1.46.0  png_0.1-9          vctrs_0.7.3        R6_2.6.1          
+[41] matrixStats_1.5.0  lifecycle_1.0.5    git2r_0.36.2       stringr_1.6.0     
+[45] fs_2.1.0           irlba_2.3.7        pkgconfig_2.0.3    callr_3.8.0       
+[49] RcppParallel_6.2.0 pillar_1.11.1      bslib_0.10.0       later_1.4.8       
+[53] gtable_0.3.6       glue_1.8.1         Rcpp_1.1.2         tidyselect_1.2.1  
+[57] xfun_0.56          tibble_3.3.1       rstudioapi_0.18.0  knitr_1.51        
+[61] farver_2.1.2       htmltools_0.5.9    rmarkdown_2.30     compiler_4.5.2    
+[65] getPass_0.2-4      S7_0.2.2          </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
