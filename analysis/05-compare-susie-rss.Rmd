@@ -99,12 +99,12 @@ if (length(missing_susie_rss_arguments)) {
 # Simulation and fitting settings. Edit this block to select the experiment.
 # -------------------------------------------------------------------------
 
-seed <- 8L
+seed <- 1L
 J <- 1000L
 N0 <- 2000L                       # reference-panel sample size
 coalescent_sample_size <- 2000L   # second population used for common-SNP QC
 N <- 200000L                      # GWAS sample size
-true_eta0 <- 200
+true_eta0 <- 100
 h2 <- 1e-3
 true_lambda <- 1e-3
 true_L_values <- c(2L, 3L)
